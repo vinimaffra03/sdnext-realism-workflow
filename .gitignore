@@ -1,0 +1,29 @@
+# Secrets and local overrides
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Model weights and large runtime assets
+*.safetensors
+*.ckpt
+*.pt
+*.pth
+*.bin
+*.gguf
+models/
+venv/
+.venv/
+
+# Generated runs stay local; curated samples are versioned
+runs/*
+!runs/.gitkeep
+
+# Windows and editor files
+Thumbs.db
+Desktop.ini
+.DS_Store
+.idea/
+.vscode/
+

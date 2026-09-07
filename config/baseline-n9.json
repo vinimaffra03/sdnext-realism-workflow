@@ -1,0 +1,21 @@
+{
+  "baseline": "n9",
+  "image": "09_DPM-SDE_cfg-6,0_seed-231984751.png",
+  "backend": "SD.Next",
+  "manager": "Stability Matrix",
+  "model": "CyberRealistic_V9_FP16 [22c7896047]",
+  "sampler_name": "DPM++ SDE",
+  "schedulers_sigma": "karras",
+  "cfg_scale": 6.0,
+  "guidance_scale": 6.0,
+  "steps": 25,
+  "seed": 231984751,
+  "width": 512,
+  "height": 512,
+  "vae_type": "Full",
+  "batch_size": 1,
+  "detailer_enabled": false,
+  "enable_hr": false,
+  "prompt": "RAW unedited candid smartphone photograph, three-quarter body portrait of a fictional clearly adult 23-year-old Brazilian woman from Santa Catarina, dark brown slightly messy hair, brown eyes, natural mature facial features, subtle facial asymmetry, visible realistic skin pores, faint natural blemishes, fine skin texture, minimal makeup, relaxed imperfect posture, wearing a simple black bikini, standing beside a residential pool in Florianopolis, subtropical vegetation, soft overcast Atlantic daylight, realistic shadows, accurate skin tones, spontaneous social media photo, slight lens distortion, imperfect framing, slight sensor grain, no beauty retouching, ordinary real-life photograph",
+  "negative_prompt": "child, teenager, young-looking, underage, nudity, explicit sexual content, cgi, 3d render, illustration, doll, mannequin, waxy skin, plastic skin, airbrushed skin, oversmoothed skin, glamour retouching, perfect symmetry, uncanny face, artificial eyes, fake teeth, excessive makeup, HDR, oversaturated, fake bokeh, bad anatomy, deformed hands, extra fingers, fused fingers, extra limbs, duplicate person, blurry, low resolution, watermark, text"
+}
