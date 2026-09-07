@@ -6,8 +6,13 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$config = Get-Content -LiteralPath (Resolve-Path -LiteralPath $ConfigPath).Path -Raw | ConvertFrom-Json
-$apiUri = "$($ApiBaseUri.TrimEnd('/'))/sdapi/v1/txt2img"
+. (Join-Path $PSScriptRoot 'SDNext.Common.ps1')
+
+$config = Read-WorkflowConfig -Path $ConfigPath
+$baseUri = $ApiBaseUri.TrimEnd('/')
+$apiUri = "$baseUri/sdapi/v1/txt2img"
+$models = @(Get-SDNextModels -ApiBaseUri $baseUri)
+$checkpoint = Resolve-SDNextCheckpoint -Models $models -Config $config
 $samplers = @('DPM++ 2M', 'DPM++ SDE', 'Euler a', 'UniPC')
 $cfgValues = @(4.5, 5.0, 5.5, 6.0, 6.5)
 $results = [System.Collections.Generic.List[object]]::new()
@@ -19,7 +24,7 @@ New-Item -ItemType Directory -Path $OutputDirectory -Force | Out-Null
 foreach ($samplerName in $samplers) {
     foreach ($cfgValue in $cfgValues) {
         $index++
-        $samplerSlug = ($samplerName -replace '[^A-Za-z0-9]+', '-').Trim('-')
+        $samplerSlug = (($samplerName -replace '[^A-Za-z0-9]+', '-').Trim('-')).ToLowerInvariant()
         $cfgText = $cfgValue.ToString('0.0', $culture)
         $cfgSlug = $cfgText.Replace('.', 'p')
         $fileName = '{0:D2}_{1}_cfg-{2}_seed-{3}.png' -f $index, $samplerSlug, $cfgSlug, $config.seed
@@ -27,14 +32,14 @@ foreach ($samplerName in $samplers) {
         $started = Get-Date
 
         if (Test-Path -LiteralPath $filePath) {
-            Write-Output "[$index/20] Existente: $fileName"
+            Write-Output "[$index/20] Existing: $fileName"
             $status = 'existing'
             $elapsed = 0
         }
         else {
-            Write-Output "[$index/20] Gerando $samplerName, CFG $cfgText..."
+            Write-Output "[$index/20] Generating $samplerName, CFG $cfgText..."
             $payload = [ordered]@{
-                sd_model_checkpoint = [string]$config.model
+                sd_model_checkpoint = [string]$checkpoint.title
                 prompt = [string]$config.prompt
                 negative_prompt = [string]$config.negative_prompt
                 seed = [long]$config.seed
@@ -57,18 +62,11 @@ foreach ($samplerName in $samplers) {
 
             try {
                 $response = Invoke-RestMethod -Uri $apiUri -Method Post -ContentType 'application/json' -Body ($payload | ConvertTo-Json -Depth 6) -TimeoutSec 900
-                if (-not $response.images -or $response.images.Count -lt 1) {
-                    throw 'A resposta do SD.Next não contém uma imagem.'
-                }
-                $encodedImage = [string]$response.images[0]
-                if ($encodedImage -match '^data:image/[^;]+;base64,') {
-                    $encodedImage = $encodedImage -replace '^data:image/[^;]+;base64,', ''
-                }
-                [IO.File]::WriteAllBytes($filePath, [Convert]::FromBase64String($encodedImage))
+                Save-SDNextImageResponse -Response $response -OutputPath $filePath
                 $status = 'ok'
             }
             catch {
-                Write-Warning "[$index/20] Falhou: $($_.Exception.Message)"
+                Write-Warning "[$index/20] Failed: $($_.Exception.Message)"
                 $status = 'failed'
             }
             $elapsed = [math]::Round(((Get-Date) - $started).TotalSeconds, 1)
@@ -107,6 +105,7 @@ $brush = [Drawing.SolidBrush]::new([Drawing.Color]::White)
 $format = [Drawing.StringFormat]::new()
 $format.Alignment = [Drawing.StringAlignment]::Center
 $format.LineAlignment = [Drawing.StringAlignment]::Center
+$contactSheetPath = Join-Path $OutputDirectory '20-image-comparison.png'
 
 try {
     foreach ($item in $results | Where-Object { $_.status -ne 'failed' }) {
@@ -126,7 +125,6 @@ try {
         $label = '#{0:D2}  {1}  CFG {2}' -f [int]$item.index, [string]$item.sampler, [string]$item.cfg
         $graphics.DrawString($label, $font, $brush, $labelRect, $format)
     }
-    $contactSheetPath = Join-Path $OutputDirectory 'comparativo-20-imagens.png'
     $sheet.Save($contactSheetPath, [Drawing.Imaging.ImageFormat]::Png)
 }
 finally {
@@ -137,6 +135,6 @@ finally {
     $sheet.Dispose()
 }
 
-Write-Output "Manifesto: $manifestPath"
-Write-Output "Comparativo: $contactSheetPath"
+Write-Output "Manifest: $manifestPath"
+Write-Output "Comparison sheet: $contactSheetPath"
 

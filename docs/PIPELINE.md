@@ -1,66 +1,70 @@
-# Pipeline reproduzível
+# Reproducible Pipeline
 
-## Fluxo
+## Flow
 
 ```text
-Configuração versionada
+Versioned configuration
         ↓
-Validação da API do SD.Next
+SD.Next API and checkpoint-hash validation
         ↓
-CyberRealistic V9 + prompt + negative prompt
+CyberRealistic v9.0 + positive prompt + negative prompt
         ↓
-DPM++ SDE / Karras / CFG 6.0 / 25 steps / seed fixa
+DPM++ SDE / Karras / CFG 6.0 / 25 steps / fixed seed
         ↓
-VAE Full
+Full VAE decode
         ↓
-PNG + metadados da execução
+PNG image + JSON execution metadata
         ↓
-Comparação visual e promoção de uma nova baseline
+Visual comparison and baseline promotion
 ```
 
-## Estágio 1 — baseline
+## Stage 1 — Versioned baseline
 
-`config/baseline-n9.json` é a fonte de verdade. O script de reprodução lê esse arquivo e envia apenas campos aceitos pelo endpoint `POST /sdapi/v1/txt2img`.
+`config/baseline-n9.json` is the source of truth. It contains the checkpoint hashes, prompts, sampling settings, seed, resolution, and feature switches.
 
-## Estágio 2 — geração controlada
+The scripts query `GET /sdapi/v1/sd-models` and locate the checkpoint by SHA-256 or AutoV2 hash. The local filename may therefore differ from the filename used in the original environment.
 
-O script `Invoke-SDNextBaseline.ps1` mantém checkpoint, prompt, negative prompt, seed, sampler, scheduler, CFG, steps, resolução e VAE. A imagem retornada em Base64 é salva localmente, junto com um JSON de metadados.
+## Stage 2 — Controlled generation
 
-## Estágio 3 — matriz experimental
+`scripts/Invoke-SDNextBaseline.ps1` sends only supported fields to `POST /sdapi/v1/txt2img`. It saves the returned Base64 image as a PNG and writes a JSON metadata sidecar.
 
-`Test-SDNextMatrix.ps1` combina:
+`scripts/Run-Workflow.ps1` is the main entry point. It validates the API and exact checkpoint before invoking baseline generation.
 
-- Samplers: DPM++ 2M, DPM++ SDE, Euler a e UniPC.
-- CFG: 4.5, 5.0, 5.5, 6.0 e 6.5.
+## Stage 3 — Experimental matrix
 
-Modelo, prompt, negative prompt, seed, scheduler, steps e resolução permanecem fixos. Isso permite atribuir diferenças visuais ao par sampler/CFG com muito mais confiança.
+`scripts/Test-SDNextMatrix.ps1` combines:
 
-## Estágio 4 — avaliação
+- Samplers: DPM++ 2M, DPM++ SDE, Euler a, and UniPC.
+- CFG values: 4.5, 5.0, 5.5, 6.0, and 6.5.
 
-Critérios usados na baseline nº 9:
+The checkpoint, prompts, seed, sigma schedule, step count, resolution, and VAE mode remain fixed. This makes differences much more attributable to the sampler/CFG pair.
 
-1. Aparência fotográfica cotidiana.
-2. Textura de pele sem acabamento plástico.
-3. Assimetria facial natural.
-4. Iluminação e sombras fisicamente coerentes.
-5. Anatomia e proporções convincentes.
-6. Ausência de HDR, saturação e bokeh artificiais.
-7. Fidelidade ao conceito de personagem fictícia adulta em fotografia de moda/praia não explícita.
+## Stage 4 — Evaluation
 
-## Estágio 5 — promoção de baseline
+The N9 baseline was evaluated using these criteria:
 
-Uma nova imagem só substitui a nº 9 quando:
+1. Ordinary photographic appearance.
+2. Natural skin texture without a plastic finish.
+3. Plausible facial asymmetry.
+4. Physically coherent lighting and shadows.
+5. Convincing anatomy and proportions.
+6. No artificial HDR, saturation, or bokeh.
+7. Fidelity to a fictional, clearly adult, non-explicit swimwear/lifestyle concept.
 
-- superar a baseline nos critérios definidos;
-- tiver parâmetros completos registrados;
-- resultar de um teste com apenas uma variável alterada;
-- não depender de arquivos ou referências sem origem e autorização registradas.
+## Stage 5 — Baseline promotion
 
-## Próximos experimentos recomendados
+A new image replaces N9 only when it:
 
-1. Proporção vertical para corrigir o enquadramento de três quartos.
-2. Ablação do bloco de microtextura de pele.
-3. Detailer desligado versus ligado.
-4. Upscale somente depois de escolher a melhor composição.
-5. Consistência de identidade com referências autorizadas, testando IP-Adapter/FaceID e depois LoRA própria separadamente.
+- outperforms the baseline under the documented criteria;
+- has complete generation parameters;
+- results from an experiment that changes only one variable;
+- does not depend on unlicensed or unauthorized source material.
+
+## Recommended next experiments
+
+1. Test a vertical aspect ratio to correct three-quarter framing.
+2. Run an ablation study on the skin-microtexture block.
+3. Compare Detailer disabled versus enabled.
+4. Upscale only after selecting the best composition.
+5. Test recurring identity using authorized references: IP-Adapter/FaceID first, then a separately evaluated custom LoRA.
 

@@ -7,33 +7,18 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'SDNext.Common.ps1')
+
 $configPathResolved = (Resolve-Path -LiteralPath $ConfigPath).Path
-$config = Get-Content -LiteralPath $configPathResolved -Raw | ConvertFrom-Json
+$config = Read-WorkflowConfig -Path $configPathResolved
 $baseUri = $ApiBaseUri.TrimEnd('/')
 $apiUri = "$baseUri/sdapi/v1/txt2img"
-
-try {
-    $models = @(Invoke-RestMethod -Uri "$baseUri/sdapi/v1/sd-models" -Method Get -TimeoutSec 15)
-}
-catch {
-    throw "SD.Next não está acessível em $baseUri. Inicie-o no Stability Matrix. Erro: $($_.Exception.Message)"
-}
-
-if (-not ($models | Where-Object { $_.title -eq $config.model -or $_.model_name -like 'CyberRealistic_V9_FP16*' })) {
-    Write-Warning "O checkpoint registrado não apareceu na lista da API: $($config.model)"
-}
-
-New-Item -ItemType Directory -Path $OutputDirectory -Force | Out-Null
-$outputPath = Join-Path $OutputDirectory $FileName
-if (Test-Path -LiteralPath $outputPath) {
-    $stem = [IO.Path]::GetFileNameWithoutExtension($FileName)
-    $extension = [IO.Path]::GetExtension($FileName)
-    $timestamp = Get-Date -Format 'yyyyMMdd-HHmmss'
-    $outputPath = Join-Path $OutputDirectory "$stem-$timestamp$extension"
-}
+$models = @(Get-SDNextModels -ApiBaseUri $baseUri)
+$checkpoint = Resolve-SDNextCheckpoint -Models $models -Config $config
+$outputPath = Get-NonDestructiveOutputPath -Directory $OutputDirectory -FileName $FileName
 
 $payload = [ordered]@{
-    sd_model_checkpoint = [string]$config.model
+    sd_model_checkpoint = [string]$checkpoint.title
     prompt = [string]$config.prompt
     negative_prompt = [string]$config.negative_prompt
     seed = [long]$config.seed
@@ -56,15 +41,7 @@ $payload = [ordered]@{
 
 $started = Get-Date
 $response = Invoke-RestMethod -Uri $apiUri -Method Post -ContentType 'application/json' -Body ($payload | ConvertTo-Json -Depth 6) -TimeoutSec 900
-if (-not $response.images -or $response.images.Count -lt 1) {
-    throw 'A resposta do SD.Next não contém uma imagem.'
-}
-
-$encodedImage = [string]$response.images[0]
-if ($encodedImage -match '^data:image/[^;]+;base64,') {
-    $encodedImage = $encodedImage -replace '^data:image/[^;]+;base64,', ''
-}
-[IO.File]::WriteAllBytes($outputPath, [Convert]::FromBase64String($encodedImage))
+Save-SDNextImageResponse -Response $response -OutputPath $outputPath
 
 $elapsed = [math]::Round(((Get-Date) - $started).TotalSeconds, 1)
 $metadata = [ordered]@{
@@ -73,12 +50,17 @@ $metadata = [ordered]@{
     elapsed_seconds = $elapsed
     api_base_uri = $baseUri
     config_source = $configPathResolved
+    resolved_checkpoint = [ordered]@{
+        title = $checkpoint.title
+        hash = $checkpoint.hash
+        sha256 = $checkpoint.sha256
+    }
     parameters = $payload
 }
 $metadataPath = [IO.Path]::ChangeExtension($outputPath, '.json')
 $metadata | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $metadataPath -Encoding UTF8
 
-Write-Output "Imagem: $outputPath"
-Write-Output "Metadados: $metadataPath"
-Write-Output "Tempo: $elapsed s"
+Write-Output "Image: $outputPath"
+Write-Output "Metadata: $metadataPath"
+Write-Output "Elapsed time: $elapsed seconds"
 

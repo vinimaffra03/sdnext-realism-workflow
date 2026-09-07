@@ -1,10 +1,12 @@
-# Verificação de reprodução
+# Reproduction Verification
 
-Em 2026-09-07, `scripts/Invoke-SDNextBaseline.ps1` foi executado contra o SD.Next local com a configuração versionada em `config/baseline-n9.json`.
+On 2026-09-07, `scripts/Invoke-SDNextBaseline.ps1` was executed against the local SD.Next instance using `config/baseline-n9.json`.
 
-- Tempo da execução de verificação: 37,8 segundos.
-- SHA-256 da baseline original: `A13F6FA67F26B22B53C848336152C10F1AFB3D8EC7AED76E4DA73D9606E8125E`
-- SHA-256 da nova reprodução: `A13F6FA67F26B22B53C848336152C10F1AFB3D8EC7AED76E4DA73D9606E8125E`
-- Resultado: arquivos byte a byte idênticos.
+- Verification generation time: 37.8 seconds.
+- Original baseline SHA-256: `A13F6FA67F26B22B53C848336152C10F1AFB3D8EC7AED76E4DA73D9606E8125E`
+- Regenerated image SHA-256: `A13F6FA67F26B22B53C848336152C10F1AFB3D8EC7AED76E4DA73D9606E8125E`
+- Result: the files were byte-for-byte identical.
 
-Isso confirma a reprodução determinística no ambiente atual. Atualizações do SD.Next, PyTorch, CUDA, checkpoint ou parâmetros podem alterar o resultado no futuro mesmo com a mesma seed.
+This confirms deterministic reproduction in the original environment. Future SD.Next, PyTorch, CUDA, checkpoint, or parameter changes may alter results even when the seed remains the same.
+
+After the English packaging and hash-based checkpoint resolver were added, `scripts/Run-Workflow.ps1` was tested end to end. It detected the required checkpoint by hash, validated the API, generated the image in 51.3 seconds, and again produced SHA-256 `A13F6FA67F26B22B53C848336152C10F1AFB3D8EC7AED76E4DA73D9606E8125E`.

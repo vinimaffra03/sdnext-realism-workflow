@@ -1,66 +1,247 @@
-# SD.Next Realism Workflow
+# SD.Next Photorealism Workflow
 
-Pipeline local e reproduzível para testes de fotografia lifestyle não explícita, com personagem fictícia e claramente adulta. O projeto preserva a baseline nº 9, os prompts, a matriz comparativa e os scripts usados com SD.Next.
+A reproducible, Windows-first workflow for generating non-explicit lifestyle and swimwear photography of a fictional, clearly adult character. It preserves the approved baseline, exact prompts, deterministic settings, comparison images, experiment metadata, and PowerShell automation used with Stability Matrix and SD.Next.
 
-## Baseline aprovada
+![Twenty-image sampler and CFG comparison](samples/20-image-comparison.png)
 
-- Checkpoint: `CyberRealistic_V9_FP16 [22c7896047]`
-- Sampler: `DPM++ SDE`
-- Scheduler/sigma: `Karras`
-- CFG: `6.0`
-- Steps: `25`
-- Seed: `231984751`
-- Resolução de teste: `512 × 512`
-- VAE: `Full`
-- Hires fix e Detailer: desligados
-- Sem LoRA, ControlNet, IP-Adapter ou imagem de entrada
+## Is it ready to run?
 
-A imagem de referência está em `samples/baseline-n9.png`. A análise completa está em `docs/MEMORIA-PROJETO-BASELINE-N9.md`.
-
-O script de reprodução foi validado no ambiente original: a imagem regenerada apresentou o mesmo SHA-256 da baseline, confirmando igualdade byte a byte. Consulte `metadata/VERIFICATION.md`.
-
-## Requisitos
-
-1. Windows com PowerShell 7 ou Windows PowerShell 5.1.
-2. Stability Matrix e SD.Next instalados.
-3. SD.Next iniciado e acessível em `http://127.0.0.1:7860`.
-4. O checkpoint CyberRealistic V9 disponível no SD.Next.
-
-O checkpoint não faz parte deste repositório. Pesos de modelos e credenciais são ignorados pelo Git.
-
-## Testar a conexão
+Yes. After the three external prerequisites below are installed, the workflow runs with one command:
 
 ```powershell
-./scripts/Test-SDNextConnection.ps1
+.\scripts\Run-Workflow.ps1
 ```
 
-## Reproduzir a baseline nº 9
+The repository intentionally does **not** include the Stability Matrix application, the SD.Next package, or the approximately 2 GB CyberRealistic checkpoint. Model weights and credentials must never be committed to this repository.
+
+Required external components:
+
+1. Stability Matrix.
+2. The SD.Next package installed through Stability Matrix.
+3. CyberRealistic v9.0, SD 1.5, pruned FP16, with AutoV2 hash `22C7896047`.
+
+## Approved baseline
+
+| Setting | Value |
+|---|---|
+| Checkpoint | CyberRealistic v9.0, pruned FP16 |
+| Model family | Stable Diffusion 1.5 |
+| AutoV2 hash | `22C7896047` |
+| Sampler | `DPM++ SDE` |
+| Sigma schedule | `Karras` |
+| CFG | `6.0` |
+| Steps | `25` |
+| Seed | `231984751` |
+| Test resolution | `512 × 512` |
+| VAE mode | `Full` |
+| Batch size | `1` |
+| Hires fix | Disabled |
+| Detailer | Disabled |
+| LoRA, ControlNet, IP-Adapter | None |
+| Input image | None |
+
+The approved image is stored at `samples/baseline-n9.png`. The full rationale is documented in `docs/BASELINE-N9-ANALYSIS.md`.
+
+The reproduction script was validated in the original environment. The regenerated image had the same SHA-256 hash as the approved baseline and was therefore byte-for-byte identical. See `metadata/VERIFICATION.md`.
+
+## Official resources
+
+| Component | Resource |
+|---|---|
+| This workflow | [vinimaffra03/sdnext-realism-workflow](https://github.com/vinimaffra03/sdnext-realism-workflow) |
+| Stability Matrix downloads | [Official Lykos AI downloads](https://lykos.ai/downloads) |
+| Stability Matrix source | [LykosAI/StabilityMatrix](https://github.com/LykosAI/StabilityMatrix) |
+| Stability Matrix installation guide | [Official installation documentation](https://github.com/LykosAI/StabilityMatrix/blob/main/docs/getting-started/installation.md) |
+| SD.Next source | [vladmandic/sdnext](https://github.com/vladmandic/sdnext) |
+| SD.Next documentation | [Official SD.Next documentation](https://vladmandic.github.io/sdnext/) |
+| SD.Next API documentation | [Official API guide](https://github.com/vladmandic/sdnext/wiki/API) |
+| CyberRealistic v9.0 page | [Official CivitAI distribution page](https://civitai.com/models/15003/cyberrealistic?modelVersionId=1941849) |
+| Exact pruned FP16 checkpoint | [CivitAI model version 1941849, file 1839464](https://civitai.com/api/download/models/1941849?fileId=1839464) |
+
+CyberRealistic is distributed through CivitAI; it does not have an official source-code repository required by this workflow. Review the model page for its current license and usage terms before using or redistributing outputs.
+
+## Start from zero on Windows
+
+### 1. Clone this private workflow repository
+
+You need access to the private repository and an authenticated Git client:
 
 ```powershell
-./scripts/Invoke-SDNextBaseline.ps1
+git clone https://github.com/vinimaffra03/sdnext-realism-workflow.git
+cd sdnext-realism-workflow
 ```
 
-A nova imagem e seu arquivo de metadados serão gravados em `runs/`. Caso o nome já exista, o script cria um arquivo com timestamp e não sobrescreve o anterior.
+### 2. Install Stability Matrix
 
-## Repetir a matriz de 20 testes
+1. Download the Windows x64 release from the [official downloads page](https://lykos.ai/downloads) or [GitHub Releases](https://github.com/LykosAI/StabilityMatrix/releases).
+2. Extract the archive to a writable location with sufficient free disk space.
+3. Run `StabilityMatrix.exe`.
+4. Complete the first-launch setup and choose a data directory. Portable mode is supported.
+
+Stability Matrix manages packages, shared model folders, Python environments, and launch settings. This workflow was developed and tested with SD.Next managed by Stability Matrix.
+
+### 3. Install the SD.Next package
+
+Inside Stability Matrix:
+
+1. Open **Packages**.
+2. Select **Add Package**.
+3. Select **SD.Next**.
+4. Install the current stable/default branch.
+5. Wait until dependency installation completes.
+
+Do not separately clone SD.Next when using this path; Stability Matrix installs and manages the [official SD.Next repository](https://github.com/vladmandic/sdnext) for you.
+
+### 4. Install the exact CyberRealistic checkpoint
+
+Recommended method:
+
+1. Open the model browser or checkpoint manager in Stability Matrix.
+2. Search for **CyberRealistic** by Cyberdelia.
+3. Select model ID `15003`, version **v9.0** / version ID `1941849`.
+4. Select the **pruned FP16** SafeTensor file, file ID `1839464`.
+5. Import it into the shared Stable Diffusion checkpoint folder.
+
+Manual method:
+
+1. Download the [exact pruned FP16 file](https://civitai.com/api/download/models/1941849?fileId=1839464).
+2. Place it in:
+
+   ```text
+   <Stability Matrix data directory>\Models\StableDiffusion\
+   ```
+
+3. Refresh model discovery or restart SD.Next.
+
+The original CivitAI filename may be `cyberrealistic_v90.safetensors`. Renaming it is optional because the scripts locate the checkpoint by cryptographic hash, not filename.
+
+Verify the file before use:
 
 ```powershell
-./scripts/Test-SDNextMatrix.ps1
+Get-FileHash -Algorithm SHA256 -LiteralPath '<path-to-checkpoint>'
 ```
 
-O teste combina quatro samplers com cinco valores de CFG, mantendo todo o restante fixo. Imagens existentes são preservadas, permitindo retomar uma execução interrompida.
-
-## Estrutura
+Expected values:
 
 ```text
-config/     configuração exata e prompts da baseline
-docs/       memória técnica e descrição da pipeline
-metadata/   resultados e ranking da matriz original
-samples/    baseline, comparativo e 20 imagens originais
-scripts/    conexão, reprodução e matriz automatizada
-runs/       novas gerações locais, ignoradas pelo Git
+AutoV2: 22C7896047
+SHA-256: 22C789604729ED346F745497B99EB62DF116E7B50F671E4EDF4058D382B0A235
 ```
 
-## Regra experimental
+Do not accidentally select the larger FP32 file. It has a different hash and is not the checkpoint used for this baseline.
 
-Mude somente uma variável por teste. Durante refinamentos da mesma composição, mantenha a seed fixa. Mude a seed apenas quando o objetivo for explorar outra pose ou composição.
+### 5. Launch SD.Next
+
+1. In Stability Matrix, open **Packages**.
+2. Find **SD.Next** and select **Launch**.
+3. Wait for the WebUI to open and for `http://127.0.0.1:7860` to respond.
+4. Leave SD.Next running while the scripts execute.
+
+The scripts use SD.Next's public `POST /sdapi/v1/txt2img` endpoint. Interactive API documentation is normally available at `http://127.0.0.1:7860/docs` while SD.Next is running.
+
+For an NVIDIA GPU with approximately 4 GB of VRAM, keep the baseline at 512 × 512, batch size 1, and use SD.Next's low-memory/medium-memory launch options when required. The original environment used CUDA with medium-VRAM optimization.
+
+### 6. Allow scripts for the current PowerShell process if required
+
+If Windows blocks local scripts:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+```
+
+This changes policy only for the current PowerShell process.
+
+### 7. Run the complete baseline workflow
+
+```powershell
+.\scripts\Run-Workflow.ps1
+```
+
+This command:
+
+1. Confirms that the SD.Next API is reachable.
+2. Finds the exact checkpoint by SHA-256 or AutoV2 hash.
+3. Sends the versioned baseline payload.
+4. Saves the PNG and a JSON metadata sidecar under `runs/`.
+
+To use a non-default SD.Next address:
+
+```powershell
+.\scripts\Run-Workflow.ps1 -ApiBaseUri 'http://127.0.0.1:7861'
+```
+
+## Individual commands
+
+Test the API and checkpoint:
+
+```powershell
+.\scripts\Test-SDNextConnection.ps1
+```
+
+Generate one deterministic baseline image:
+
+```powershell
+.\scripts\Invoke-SDNextBaseline.ps1
+```
+
+Repeat the original 20-image sampler/CFG matrix:
+
+```powershell
+.\scripts\Test-SDNextMatrix.ps1
+```
+
+Generate the 20-seed Camila identity experiment:
+
+```powershell
+.\scripts\Invoke-CamilaSet.ps1
+```
+
+That experiment changes the identity description while preserving the approved realism blocks and negative prompt. It writes the images, `manifest.csv`, `contact-sheet.png`, and `head-to-head.png` to `runs/camila-claude-v1/`. See `docs/CLAUDE-VS-GPT-COMPARISON.md`.
+
+## Repository structure
+
+```text
+config/     Exact baseline and experiment configurations
+docs/       Pipeline, baseline analysis, and experiment rationale
+metadata/   Original matrix results, verification record, and checksums
+samples/    Approved baseline, comparison sheet, and original matrix images
+scripts/    Connection checks and reproducible generation scripts
+runs/       New local outputs; ignored by Git
+```
+
+## Troubleshooting
+
+### SD.Next cannot be reached
+
+- Confirm that SD.Next is still running in Stability Matrix.
+- Open `http://127.0.0.1:7860` in a browser.
+- If another port is used, pass `-ApiBaseUri` to the script.
+
+### The checkpoint hash is not found
+
+- Confirm that version v9.0, pruned FP16 was downloaded.
+- Refresh model discovery or restart SD.Next.
+- Compare the checkpoint SHA-256 with the expected value above.
+- The filename is irrelevant; the file contents and hash must match.
+
+### CUDA out-of-memory error
+
+- Keep 512 × 512 resolution and batch size 1 for initial tests.
+- Enable SD.Next memory optimization for low-VRAM hardware.
+- Close other GPU-intensive applications.
+- Do not enable Hires fix, Detailer, ControlNet, and upscale simultaneously.
+
+### A script is blocked by Windows
+
+Use the process-scoped execution-policy command shown in step 6, then run the workflow again.
+
+## Experimental rule
+
+Change only one variable per test. Keep the seed fixed while refining the same composition. Change the seed only when intentionally exploring a different pose or composition.
+
+## Content and data requirements
+
+- Keep every generated subject fictional and clearly adult.
+- The approved baseline is non-explicit swimwear/lifestyle photography.
+- Do not use a real person's likeness without documented permission.
+- Keep source and authorization records for any future reference images, FaceID/IP-Adapter inputs, or LoRA training data.

@@ -1,21 +1,21 @@
 index,file,sampler,sigma,cfg,steps,seed,width,height,elapsed_seconds,ranking
-1,"01_DPM-2M_cfg-4,5_seed-231984751.png","DPM++ 2M",karras,4.5,25,231984751,512,512,43.1,
-2,"02_DPM-2M_cfg-5,0_seed-231984751.png","DPM++ 2M",karras,5.0,25,231984751,512,512,40.5,
-3,"03_DPM-2M_cfg-5,5_seed-231984751.png","DPM++ 2M",karras,5.5,25,231984751,512,512,39.1,
-4,"04_DPM-2M_cfg-6,0_seed-231984751.png","DPM++ 2M",karras,6.0,25,231984751,512,512,38.1,
-5,"05_DPM-2M_cfg-6,5_seed-231984751.png","DPM++ 2M",karras,6.5,25,231984751,512,512,45.0,3
-6,"06_DPM-SDE_cfg-4,5_seed-231984751.png","DPM++ SDE",karras,4.5,25,231984751,512,512,40.4,
-7,"07_DPM-SDE_cfg-5,0_seed-231984751.png","DPM++ SDE",karras,5.0,25,231984751,512,512,41.2,
-8,"08_DPM-SDE_cfg-5,5_seed-231984751.png","DPM++ SDE",karras,5.5,25,231984751,512,512,43.2,
-9,"09_DPM-SDE_cfg-6,0_seed-231984751.png","DPM++ SDE",karras,6.0,25,231984751,512,512,39.1,1
-10,"10_DPM-SDE_cfg-6,5_seed-231984751.png","DPM++ SDE",karras,6.5,25,231984751,512,512,39.3,2
-11,"11_Euler-a_cfg-4,5_seed-231984751.png","Euler a",karras,4.5,25,231984751,512,512,39.6,
-12,"12_Euler-a_cfg-5,0_seed-231984751.png","Euler a",karras,5.0,25,231984751,512,512,39.8,
-13,"13_Euler-a_cfg-5,5_seed-231984751.png","Euler a",karras,5.5,25,231984751,512,512,41.5,
-14,"14_Euler-a_cfg-6,0_seed-231984751.png","Euler a",karras,6.0,25,231984751,512,512,42.3,
-15,"15_Euler-a_cfg-6,5_seed-231984751.png","Euler a",karras,6.5,25,231984751,512,512,42.6,
-16,"16_UniPC_cfg-4,5_seed-231984751.png",UniPC,karras,4.5,25,231984751,512,512,42.7,
-17,"17_UniPC_cfg-5,0_seed-231984751.png",UniPC,karras,5.0,25,231984751,512,512,40.0,
-18,"18_UniPC_cfg-5,5_seed-231984751.png",UniPC,karras,5.5,25,231984751,512,512,38.7,
-19,"19_UniPC_cfg-6,0_seed-231984751.png",UniPC,karras,6.0,25,231984751,512,512,38.9,
-20,"20_UniPC_cfg-6,5_seed-231984751.png",UniPC,karras,6.5,25,231984751,512,512,38.9,
+1,01_dpm-2m_cfg-4p5_seed-231984751.png,"DPM++ 2M",karras,4.5,25,231984751,512,512,43.1,
+2,02_dpm-2m_cfg-5p0_seed-231984751.png,"DPM++ 2M",karras,5.0,25,231984751,512,512,40.5,
+3,03_dpm-2m_cfg-5p5_seed-231984751.png,"DPM++ 2M",karras,5.5,25,231984751,512,512,39.1,
+4,04_dpm-2m_cfg-6p0_seed-231984751.png,"DPM++ 2M",karras,6.0,25,231984751,512,512,38.1,
+5,05_dpm-2m_cfg-6p5_seed-231984751.png,"DPM++ 2M",karras,6.5,25,231984751,512,512,45.0,3
+6,06_dpm-sde_cfg-4p5_seed-231984751.png,"DPM++ SDE",karras,4.5,25,231984751,512,512,40.4,
+7,07_dpm-sde_cfg-5p0_seed-231984751.png,"DPM++ SDE",karras,5.0,25,231984751,512,512,41.2,
+8,08_dpm-sde_cfg-5p5_seed-231984751.png,"DPM++ SDE",karras,5.5,25,231984751,512,512,43.2,
+9,09_dpm-sde_cfg-6p0_seed-231984751.png,"DPM++ SDE",karras,6.0,25,231984751,512,512,39.1,1
+10,10_dpm-sde_cfg-6p5_seed-231984751.png,"DPM++ SDE",karras,6.5,25,231984751,512,512,39.3,2
+11,11_euler-a_cfg-4p5_seed-231984751.png,"Euler a",karras,4.5,25,231984751,512,512,39.6,
+12,12_euler-a_cfg-5p0_seed-231984751.png,"Euler a",karras,5.0,25,231984751,512,512,39.8,
+13,13_euler-a_cfg-5p5_seed-231984751.png,"Euler a",karras,5.5,25,231984751,512,512,41.5,
+14,14_euler-a_cfg-6p0_seed-231984751.png,"Euler a",karras,6.0,25,231984751,512,512,42.3,
+15,15_euler-a_cfg-6p5_seed-231984751.png,"Euler a",karras,6.5,25,231984751,512,512,42.6,
+16,16_unipc_cfg-4p5_seed-231984751.png,UniPC,karras,4.5,25,231984751,512,512,42.7,
+17,17_unipc_cfg-5p0_seed-231984751.png,UniPC,karras,5.0,25,231984751,512,512,40.0,
+18,18_unipc_cfg-5p5_seed-231984751.png,UniPC,karras,5.5,25,231984751,512,512,38.7,
+19,19_unipc_cfg-6p0_seed-231984751.png,UniPC,karras,6.0,25,231984751,512,512,38.9,
+20,20_unipc_cfg-6p5_seed-231984751.png,UniPC,karras,6.5,25,231984751,512,512,38.9,
