@@ -198,6 +198,26 @@ Generate the 20-seed Camila identity experiment:
 
 That experiment changes the identity description while preserving the approved realism blocks and negative prompt. It writes the images, `manifest.csv`, `contact-sheet.png`, and `head-to-head.png` to `runs/camila-claude-v1/`. See `docs/CLAUDE-VS-GPT-COMPARISON.md`.
 
+Run the controlled 10-scene by 5-stage identity stress test:
+
+```powershell
+# Validate one scene across all five stages first.
+.\scripts\Invoke-IdentityStressTest.ps1 -StartShot 1 -EndShot 1
+
+# Resume or run the complete 50-image matrix.
+.\scripts\Invoke-IdentityStressTest.ps1
+```
+
+The five stages compare text-only generation, IP-Adapter Plus Face, FaceID, IP-Adapter with OpenPose, and a conservative detailer plus 2x upscale finishing pass. Read [`docs/IDENTITY-STRESS-TEST.md`](docs/IDENTITY-STRESS-TEST.md) before running it. The document explains reference provenance, auxiliary downloads, dependencies between stages, evaluation criteria, resumability, exclusions, and why an identity LoRA must be trained and validated separately before it can be added honestly.
+
+On a memory-constrained Windows system, use the optional preflighted launcher before the pilot:
+
+```powershell
+.\scripts\Start-SDNextLowMemory.ps1
+```
+
+It uses a separate no-autoload configuration and state-dict offload, and refuses to start when Windows has insufficient free committed-memory headroom. It never closes applications or changes the page file automatically.
+
 ## Repository structure
 
 ```text

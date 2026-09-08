@@ -1,0 +1,10 @@
+{
+  "sd_checkpoint_autoload": false,
+  "offload_state_dict": true,
+  "sd_model_checkpoint": "CyberRealistic_V9_FP16 [22c7896047]",
+  "sd_checkpoint_hash": "22c789604729ed346f745497b99eb62df116e7b50f671e4edf4058d382b0a235",
+  "schedulers_sigma": "karras",
+  "samples_save": false,
+  "samples_format": "png",
+  "image_metadata": true
+}
