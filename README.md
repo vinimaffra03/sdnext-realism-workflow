@@ -208,15 +208,26 @@ Run the controlled 10-scene by 5-stage identity stress test:
 .\scripts\Invoke-IdentityStressTest.ps1
 ```
 
-The five stages compare text-only generation, IP-Adapter Plus Face, FaceID, IP-Adapter with OpenPose, and a conservative detailer plus 2x upscale finishing pass. Read [`docs/IDENTITY-STRESS-TEST.md`](docs/IDENTITY-STRESS-TEST.md) before running it. The document explains reference provenance, auxiliary downloads, dependencies between stages, evaluation criteria, resumability, exclusions, and why an identity LoRA must be trained and validated separately before it can be added honestly.
+The five stages compare text-only generation, IP-Adapter Plus Face, FaceID, an OpenPose-only composition, and a two-stage finish that applies the Detailer, 2x upscale, and offline FaceSwap in that order. Identity is deliberately applied after pose generation because IP-Adapter and OpenPose competed for composition on the tested 4 GB GPU. Read [`docs/IDENTITY-STRESS-TEST.md`](docs/IDENTITY-STRESS-TEST.md) before running it.
 
 On a memory-constrained Windows system, use the optional preflighted launcher before the pilot:
 
 ```powershell
-.\scripts\Start-SDNextLowMemory.ps1
+.\scripts\Start-SDNextLowMemory.ps1 -ComputeDType BF16 -MemoryMode lowvram
 ```
 
-It uses a separate no-autoload configuration and state-dict offload, and refuses to start when Windows has insufficient free committed-memory headroom. It never closes applications or changes the page file automatically.
+It uses a separate no-autoload configuration and balanced model offload, and refuses to start when Windows has insufficient free committed-memory headroom. BF16 compute is required for this checkpoint on the tested GTX 1650 because FP16 produced invalid black images. It never closes applications or changes the page file automatically.
+
+The tested SD.Next revision needs two small API compatibility fixes before the `POS` stage can use OpenPose. Stop SD.Next, apply the version-checked patch, and restart it:
+
+```powershell
+.\scripts\Apply-SDNextApiCompatibilityPatch.ps1 `
+  -PackagePath '<Stability Matrix data directory>\Packages\SD.Next'
+
+.\scripts\Start-SDNextLowMemory.ps1 -ComputeDType BF16 -MemoryMode lowvram
+```
+
+The patch corrects the `/sdapi/v1/preprocess` response schema and makes API-created ControlNet units inherit the active BF16 dtype. The low-memory launcher intentionally keeps the Control tab initialized because SD.Next registers selectable Control scripts while building that tab. It refuses an untested SD.Next revision unless `-AllowDifferentRevision` is supplied deliberately, creates backups before editing, validates Python syntax, and requires a restart. See [`docs/IDENTITY-STRESS-TEST.md`](docs/IDENTITY-STRESS-TEST.md) for the tested limitations.
 
 ## Repository structure
 
@@ -250,6 +261,19 @@ runs/       New local outputs; ignored by Git
 - Enable SD.Next memory optimization for low-VRAM hardware.
 - Close other GPU-intensive applications.
 - Do not enable Hires fix, Detailer, ControlNet, and upscale simultaneously.
+
+### OpenPose fails with a response-schema or dtype error
+
+- Confirm that SD.Next is at the tested revision documented in `docs/IDENTITY-STRESS-TEST.md`.
+- Stop SD.Next and run `scripts/Apply-SDNextApiCompatibilityPatch.ps1` as shown above.
+- Restart with BF16 compute and `-MemoryMode lowvram`.
+- Validate one `POS` scene before starting the complete matrix.
+
+### FaceSwap is silently ignored on the Control API
+
+- Start SD.Next with `scripts/Start-SDNextLowMemory.ps1`; its default disabled-tab list keeps the Control tab initialized.
+- Confirm that `GET /sdapi/v1/scripts` lists `face: multiple id transfers` under `control`.
+- The production path does not run FaceSwap inside diffusion. It applies `scripts/Invoke-OfflineFaceSwap.py` after pose, detail, and upscale so identity cannot change composition.
 
 ### A script is blocked by Windows
 

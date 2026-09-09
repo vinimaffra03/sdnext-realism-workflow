@@ -11,6 +11,9 @@ param(
     [int]$EndShot = 10,
     [ValidateRange(60, 7200)]
     [int]$TimeoutSec = 1800,
+    [string]$PackagePath = 'D:\AIMODEL\StabilityMatrix-win-x64\Data\Packages\SD.Next',
+    [string]$AnalysisRoot = 'D:\AIMODEL\StabilityMatrix-win-x64\Data\Models\Diffusers\models--vladmandic--insightface-faceanalysis',
+    [string]$SwapperModel = 'D:\AIMODEL\StabilityMatrix-win-x64\Data\Packages\SD.Next\models\huggingface\models--ezioruan--inswapper_128.onnx\snapshots\6ffdf0e83c5996cc425e77b59913fc48d79441be\inswapper_128.onnx',
     [switch]$Force
 )
 
@@ -48,6 +51,12 @@ if ($referenceHash -ine [string]$config.subject.reference_sha256) {
     throw "Reference hash mismatch. Expected $($config.subject.reference_sha256), found $referenceHash."
 }
 $referenceBase64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes($referencePath))
+$faceSwapReferencePath = Join-Path $repoRoot ([string]$config.identity.face_swap_reference)
+$faceSwapReferencePath = (Resolve-Path -LiteralPath $faceSwapReferencePath).Path
+$faceSwapReferenceHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $faceSwapReferencePath).Hash
+if ($faceSwapReferenceHash -ine [string]$config.identity.face_swap_reference_sha256) {
+    throw "FaceSwap reference hash mismatch. Expected $($config.identity.face_swap_reference_sha256), found $faceSwapReferenceHash."
+}
 
 $manifestPath = Join-Path $OutputDirectory 'manifest.csv'
 $script:records = if (Test-Path -LiteralPath $manifestPath) { @(Import-Csv -LiteralPath $manifestPath) } else { @() }
@@ -103,6 +112,65 @@ function Get-ImageDimensions {
     }
 }
 
+function Get-ImageContentMetrics {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$Path)
+
+    $stream = [IO.File]::OpenRead($Path)
+    $source = $null
+    $bitmap = $null
+    try {
+        $source = [Drawing.Image]::FromStream($stream)
+        $bitmap = [Drawing.Bitmap]::new($source)
+        $strideX = [Math]::Max(1, [int][Math]::Floor($bitmap.Width / 64))
+        $strideY = [Math]::Max(1, [int][Math]::Floor($bitmap.Height / 64))
+        $colors = [Collections.Generic.HashSet[int]]::new()
+        [long]$rgbSum = 0
+        [long]$sampleCount = 0
+        $minLuminance = 255
+        $maxLuminance = 0
+
+        for ($y = 0; $y -lt $bitmap.Height; $y += $strideY) {
+            for ($x = 0; $x -lt $bitmap.Width; $x += $strideX) {
+                $pixel = $bitmap.GetPixel($x, $y)
+                [void]$colors.Add($pixel.ToArgb())
+                $luminance = [int](($pixel.R + $pixel.G + $pixel.B) / 3)
+                $rgbSum += $pixel.R + $pixel.G + $pixel.B
+                $sampleCount++
+                if ($luminance -lt $minLuminance) { $minLuminance = $luminance }
+                if ($luminance -gt $maxLuminance) { $maxLuminance = $luminance }
+            }
+        }
+
+        return [pscustomobject]@{
+            Width = $bitmap.Width
+            Height = $bitmap.Height
+            SampleCount = $sampleCount
+            UniqueColors = $colors.Count
+            RgbSum = $rgbSum
+            LuminanceMin = $minLuminance
+            LuminanceMax = $maxLuminance
+            LuminanceRange = $maxLuminance - $minLuminance
+        }
+    }
+    finally {
+        if ($null -ne $bitmap) { $bitmap.Dispose() }
+        if ($null -ne $source) { $source.Dispose() }
+        $stream.Dispose()
+    }
+}
+
+function Assert-UsableImage {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$Path)
+
+    $metrics = Get-ImageContentMetrics -Path $Path
+    if ($metrics.UniqueColors -lt 16 -or $metrics.LuminanceRange -lt 8 -or $metrics.RgbSum -eq 0) {
+        throw "Generated image is blank or nearly uniform: $Path (sample_colors=$($metrics.UniqueColors), luminance_range=$($metrics.LuminanceRange), rgb_sum=$($metrics.RgbSum))."
+    }
+    return $metrics
+}
+
 function Test-ExistingStageOutput {
     [CmdletBinding()]
     param(
@@ -115,11 +183,11 @@ function Test-ExistingStageOutput {
         return $false
     }
     try {
-        $dimensions = Get-ImageDimensions -Path $Path
-        if ($dimensions.Width -eq $ExpectedWidth -and $dimensions.Height -eq $ExpectedHeight) {
+        $metrics = Assert-UsableImage -Path $Path
+        if ($metrics.Width -eq $ExpectedWidth -and $metrics.Height -eq $ExpectedHeight) {
             return $true
         }
-        Write-Warning "Existing PNG has unexpected dimensions and will be regenerated: $Path ($($dimensions.Width)x$($dimensions.Height), expected ${ExpectedWidth}x${ExpectedHeight})."
+        Write-Warning "Existing PNG has unexpected dimensions and will be regenerated: $Path ($($metrics.Width)x$($metrics.Height), expected ${ExpectedWidth}x${ExpectedHeight})."
     }
     catch {
         Write-Warning "Existing output is not a readable PNG and will be regenerated: $Path"
@@ -311,6 +379,7 @@ function Save-GenerationResponse {
         throw 'The SD.Next response did not contain an image.'
     }
     Save-Base64Image -Encoded ([string]$Response.images[0]) -Path $OutputPath
+    Assert-UsableImage -Path $OutputPath | Out-Null
 }
 
 function Invoke-TxtStage {
@@ -390,7 +459,7 @@ function Invoke-PoseStage {
     $filePath = Join-Path $OutputDirectory $fileName
     if ((Test-ExistingStageOutput -Path $filePath -ExpectedWidth ([int]$config.model.width) -ExpectedHeight ([int]$config.model.height)) -and -not $Force) {
         Write-Host "[$($Shot.id)-$stage] Existing output; skipping."
-        Set-ManifestRecord -Shot $Shot.id -Stage $stage -Seed $Shot.seed -File $fileName -Status 'existing' -Conditioning 'IP-Adapter Plus Face + OpenPose'
+        Set-ManifestRecord -Shot $Shot.id -Stage $stage -Seed $Shot.seed -File $fileName -Status 'existing' -Conditioning 'OpenPose only; identity deferred to FIN'
         return $filePath
     }
 
@@ -420,6 +489,21 @@ function Invoke-PoseStage {
             $poseBase64 = Get-FileBase64 -Path $poseMapPath
         }
 
+        $controlUnit = [ordered]@{
+            process = [string]$config.identity.openpose_preprocessor
+            model = [string]$config.identity.openpose_model
+            strength = [double]$config.identity.openpose_strength
+            start = [double]$config.identity.openpose_start
+            end = [double]$config.identity.openpose_end
+            unit_type = 'controlnet'
+            process_params = [ordered]@{
+                include_body = $true
+                include_hand = $true
+                include_face = $false
+            }
+            override = $poseBase64
+        }
+
         $payload = [ordered]@{
             input_type = 0
             prompt = $Prompt
@@ -438,37 +522,21 @@ function Invoke-PoseStage {
             save_images = $false
             send_images = $true
             unit_type = 'controlnet'
-            inputs = @($sourceBase64)
-            ip_adapter = @(New-IPAdapterUnit)
-            control = @(
-                [ordered]@{
-                    process = [string]$config.identity.openpose_preprocessor
-                    model = [string]$config.identity.openpose_model
-                    strength = [double]$config.identity.openpose_strength
-                    start = [double]$config.identity.openpose_start
-                    end = [double]$config.identity.openpose_end
-                    unit_type = 'controlnet'
-                    override = $poseBase64
-                    process_params = [ordered]@{
-                        include_body = $true
-                        include_hand = $true
-                        include_face = $false
-                    }
-                }
-            )
+            inputs = @()
+            control = @($controlUnit)
         }
 
-        Write-Host "[$($Shot.id)-POS] Generating with IP-Adapter and OpenPose..."
+        Write-Host "[$($Shot.id)-POS] Generating the pose-correct base with OpenPose only..."
         $response = Invoke-SDNextPost -Uri $controlUri -Payload $payload -RequestName "$($Shot.id)-POS"
         Save-GenerationResponse -Response $response -OutputPath $filePath
         $responseInfoFile = Write-ResponseInfo -Name "$($Shot.id)-POS" -Response $response
         $elapsed = ((Get-Date) - $started).TotalSeconds
-        Set-ManifestRecord -Shot $Shot.id -Stage $stage -Seed $Shot.seed -File $fileName -Status 'ok' -ElapsedSeconds $elapsed -Conditioning 'IP-Adapter Plus Face + OpenPose' -ParentFile ([IO.Path]::GetFileName($PoseSourcePath)) -ResponseInfoFile $responseInfoFile
+        Set-ManifestRecord -Shot $Shot.id -Stage $stage -Seed $Shot.seed -File $fileName -Status 'ok' -ElapsedSeconds $elapsed -Conditioning 'OpenPose only; identity deferred to FIN' -ParentFile ([IO.Path]::GetFileName($PoseSourcePath)) -ResponseInfoFile $responseInfoFile
         return $filePath
     }
     catch {
         $elapsed = ((Get-Date) - $started).TotalSeconds
-        Set-ManifestRecord -Shot $Shot.id -Stage $stage -Seed $Shot.seed -File $fileName -Status 'failed' -ElapsedSeconds $elapsed -Conditioning 'IP-Adapter Plus Face + OpenPose' -ErrorMessage $_.Exception.Message
+        Set-ManifestRecord -Shot $Shot.id -Stage $stage -Seed $Shot.seed -File $fileName -Status 'failed' -ElapsedSeconds $elapsed -Conditioning 'OpenPose only; identity deferred to FIN' -ErrorMessage $_.Exception.Message
         Write-Warning "[$($Shot.id)-POS] Failed: $($_.Exception.Message)"
         return $null
     }
@@ -487,7 +555,7 @@ function Invoke-FinishStage {
     $filePath = Join-Path $OutputDirectory $fileName
     if ((Test-ExistingStageOutput -Path $filePath -ExpectedWidth (2 * [int]$config.model.width) -ExpectedHeight (2 * [int]$config.model.height)) -and -not $Force) {
         Write-Host "[$($Shot.id)-$stage] Existing output; skipping."
-        Set-ManifestRecord -Shot $Shot.id -Stage $stage -Seed $Shot.seed -File $fileName -Status 'existing' -Conditioning 'face detailer + 2x RealESRGAN Compact'
+        Set-ManifestRecord -Shot $Shot.id -Stage $stage -Seed $Shot.seed -File $fileName -Status 'existing' -Conditioning 'face detailer + 2x RealESRGAN Compact + offline FaceSwap'
         return $filePath
     }
 
@@ -518,6 +586,7 @@ function Invoke-FinishStage {
         }
         $detailPath = Join-Path $detailDirectory "$($Shot.id)-DET.png"
         Save-Base64Image -Encoded ([string]$detailResponse.image) -Path $detailPath
+        Assert-UsableImage -Path $detailPath | Out-Null
 
         $upscalePayload = [ordered]@{
             image = Get-FileBase64 -Path $detailPath
@@ -534,15 +603,26 @@ function Invoke-FinishStage {
         if (-not $upscaleResponse.image) {
             throw 'Upscaler returned no image.'
         }
-        Save-Base64Image -Encoded ([string]$upscaleResponse.image) -Path $filePath
+        $upscaledPath = Join-Path $detailDirectory "$($Shot.id)-UP-2X.png"
+        Save-Base64Image -Encoded ([string]$upscaleResponse.image) -Path $upscaledPath
+        Assert-UsableImage -Path $upscaledPath | Out-Null
+
+        Write-Host "[$($Shot.id)-FIN] Applying identity after pose, detail, and upscale..."
+        $python = Join-Path $PackagePath 'venv\Scripts\python.exe'
+        $faceSwapScript = Join-Path $PSScriptRoot 'Invoke-OfflineFaceSwap.py'
+        & $python $faceSwapScript --source $faceSwapReferencePath --target $upscaledPath --output $filePath --analysis-root $AnalysisRoot --swapper-model $SwapperModel
+        if ($LASTEXITCODE -ne 0) {
+            throw "Offline FaceSwap failed with exit code $LASTEXITCODE."
+        }
+        Assert-UsableImage -Path $filePath | Out-Null
         $responseInfoFile = Write-ResponseInfo -Name "$($Shot.id)-FIN" -Response $upscaleResponse
         $elapsed = ((Get-Date) - $started).TotalSeconds
-        Set-ManifestRecord -Shot $Shot.id -Stage $stage -Seed $Shot.seed -File $fileName -Status 'ok' -ElapsedSeconds $elapsed -Conditioning 'face-yolo8n detailer + Spandrel 2x RealESRGAN Compact' -ParentFile ([IO.Path]::GetFileName($SourcePath)) -ResponseInfoFile $responseInfoFile
+        Set-ManifestRecord -Shot $Shot.id -Stage $stage -Seed $Shot.seed -File $fileName -Status 'ok' -ElapsedSeconds $elapsed -Conditioning 'face-yolo8n detailer + Spandrel 2x RealESRGAN Compact + offline FaceSwap' -ParentFile ([IO.Path]::GetFileName($SourcePath)) -ResponseInfoFile $responseInfoFile
         return $filePath
     }
     catch {
         $elapsed = ((Get-Date) - $started).TotalSeconds
-        Set-ManifestRecord -Shot $Shot.id -Stage $stage -Seed $Shot.seed -File $fileName -Status 'failed' -ElapsedSeconds $elapsed -Conditioning 'face-yolo8n detailer + Spandrel 2x RealESRGAN Compact' -ErrorMessage $_.Exception.Message
+        Set-ManifestRecord -Shot $Shot.id -Stage $stage -Seed $Shot.seed -File $fileName -Status 'failed' -ElapsedSeconds $elapsed -Conditioning 'face-yolo8n detailer + Spandrel 2x RealESRGAN Compact + offline FaceSwap' -ErrorMessage $_.Exception.Message
         Write-Warning "[$($Shot.id)-FIN] Failed: $($_.Exception.Message)"
         return $null
     }
@@ -575,7 +655,7 @@ body{font-family:Arial,sans-serif;background:#171717;color:#eee;margin:20px}tabl
 </head>
 <body>
 <h1>Identity stress test v1</h1>
-<p>TXT = text only; IPA = IP-Adapter Plus Face; FID = FaceID; POS = IP-Adapter + OpenPose; FIN = POS + conservative face detailer + 2x upscale.</p>
+<p>TXT = text only; IPA = IP-Adapter Plus Face; FID = FaceID; POS = OpenPose-only composition; FIN = POS + conservative face detailer + 2x upscale + offline FaceSwap.</p>
 <table><thead><tr><th>Shot</th><th>TXT</th><th>IPA</th><th>FID</th><th>POS</th><th>FIN</th></tr></thead><tbody>
 $($rows -join "`n")
 </tbody></table>
@@ -629,25 +709,43 @@ if ([string]$checkpoint.hash -notlike "*$($config.model.autov2)*" -and [string]$
     throw "The loaded checkpoint does not match AutoV2 $($config.model.autov2). Loaded: '$($checkpoint.title)' hash '$($checkpoint.hash)'."
 }
 
-$preprocessors = @(Invoke-RestMethod -Uri "$baseUri/sdapi/v1/preprocessors" -Method Get -TimeoutSec 30)
-if ('OpenPose' -notin @($preprocessors.name)) {
-    throw 'Required preprocessor is unavailable: OpenPose.'
+if ($Stages -contains 'POS') {
+    $preprocessors = Invoke-RestMethod -Uri "$baseUri/sdapi/v1/preprocessors" -Method Get -TimeoutSec 30
+    if ('OpenPose' -notin @($preprocessors.name)) {
+        throw 'Required preprocessor is unavailable: OpenPose.'
+    }
+    $controlModelsResponse = Invoke-RestMethod -Uri "$baseUri/sdapi/v1/control-models" -Method Get -TimeoutSec 30
+    $controlModels = @($controlModelsResponse)
+    if ([string]$config.identity.openpose_model -notin $controlModels) {
+        throw "Required ControlNet model is unavailable: $($config.identity.openpose_model)."
+    }
 }
-$controlModels = @(Invoke-RestMethod -Uri "$baseUri/sdapi/v1/control-models" -Method Get -TimeoutSec 30)
-if ([string]$config.identity.openpose_model -notin $controlModels) {
-    throw "Required ControlNet model is unavailable: $($config.identity.openpose_model)."
+if ($Stages -contains 'IPA') {
+    $ipAdaptersResponse = Invoke-RestMethod -Uri "$baseUri/sdapi/v1/ip-adapters" -Method Get -TimeoutSec 30
+    $ipAdapters = @($ipAdaptersResponse)
+    if ([string]$config.identity.ip_adapter -notin $ipAdapters) {
+        throw "Required IP-Adapter is unavailable: $($config.identity.ip_adapter)."
+    }
 }
-$ipAdapters = @(Invoke-RestMethod -Uri "$baseUri/sdapi/v1/ip-adapters" -Method Get -TimeoutSec 30)
-if ([string]$config.identity.ip_adapter -notin $ipAdapters) {
-    throw "Required IP-Adapter is unavailable: $($config.identity.ip_adapter)."
-}
-$detailers = @(Invoke-RestMethod -Uri "$baseUri/sdapi/v1/detailers" -Method Get -TimeoutSec 30)
-if ('face-yolo8n' -notin @($detailers.name)) {
-    throw 'Required detailer is unavailable: face-yolo8n.'
-}
-$upscalers = @(Invoke-RestMethod -Uri "$baseUri/sdapi/v1/upscalers" -Method Get -TimeoutSec 30)
-if ('Spandrel 2x RealESRGAN Compact' -notin @($upscalers.name)) {
-    throw 'Required upscaler is unavailable: Spandrel 2x RealESRGAN Compact.'
+if ($Stages -contains 'FIN') {
+    $detailers = @(Invoke-RestMethod -Uri "$baseUri/sdapi/v1/detailers" -Method Get -TimeoutSec 30)
+    if ('face-yolo8n' -notin @($detailers.name)) {
+        throw 'Required detailer is unavailable: face-yolo8n.'
+    }
+    $upscalers = @(Invoke-RestMethod -Uri "$baseUri/sdapi/v1/upscalers" -Method Get -TimeoutSec 30)
+    if ('Spandrel 2x RealESRGAN Compact' -notin @($upscalers.name)) {
+        throw 'Required upscaler is unavailable: Spandrel 2x RealESRGAN Compact.'
+    }
+    foreach ($requiredPath in @(
+        (Join-Path $PackagePath 'venv\Scripts\python.exe'),
+        (Join-Path $PSScriptRoot 'Invoke-OfflineFaceSwap.py'),
+        (Join-Path $AnalysisRoot 'models\buffalo_l'),
+        $SwapperModel
+    )) {
+        if (-not (Test-Path -LiteralPath $requiredPath)) {
+            throw "Required offline FaceSwap dependency is unavailable: $requiredPath"
+        }
+    }
 }
 
 $selectedShots = @($config.shots | Where-Object {
@@ -686,7 +784,7 @@ foreach ($stage in $orderedStages) {
                     [void](Invoke-PoseStage -Shot $shot -Prompt $prompt -PoseSourcePath $txtPath)
                 }
                 else {
-                    Set-ManifestRecord -Shot $shot.id -Stage 'POS' -Seed $shot.seed -File "$($shot.id)-POS.png" -Status 'blocked' -Conditioning 'IP-Adapter Plus Face + OpenPose' -ErrorMessage 'A valid TXT pose source is missing.'
+                    Set-ManifestRecord -Shot $shot.id -Stage 'POS' -Seed $shot.seed -File "$($shot.id)-POS.png" -Status 'blocked' -Conditioning 'OpenPose only; identity deferred to FIN' -ErrorMessage 'A valid TXT pose source is missing.'
                 }
             }
             'FIN' {
@@ -695,7 +793,7 @@ foreach ($stage in $orderedStages) {
                     [void](Invoke-FinishStage -Shot $shot -Prompt $prompt -SourcePath $posePath)
                 }
                 else {
-                    Set-ManifestRecord -Shot $shot.id -Stage 'FIN' -Seed $shot.seed -File "$($shot.id)-FIN.png" -Status 'blocked' -Conditioning 'face detailer + 2x upscale' -ErrorMessage 'A valid POS source is missing.'
+                    Set-ManifestRecord -Shot $shot.id -Stage 'FIN' -Seed $shot.seed -File "$($shot.id)-FIN.png" -Status 'blocked' -Conditioning 'face detailer + 2x upscale + offline FaceSwap' -ErrorMessage 'A valid POS source is missing.'
                 }
             }
         }

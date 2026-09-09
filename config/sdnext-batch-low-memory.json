@@ -1,10 +1,20 @@
 {
   "sd_checkpoint_autoload": false,
-  "offload_state_dict": true,
+  "sd_parallel_load": false,
+  "offload_state_dict": false,
+  "diffusers_to_gpu": false,
+  "diffusers_offload_mode": "balanced",
+  "diffusers_offload_min_gpu_memory": 0.0,
+  "diffusers_offload_max_gpu_memory": 0.55,
+  "diffusers_vae_slicing": true,
+  "diffusers_vae_tiling": true,
+  "show_progress_type": "None",
+  "show_progress_every_n_steps": 0,
   "sd_model_checkpoint": "CyberRealistic_V9_FP16 [22c7896047]",
-  "sd_checkpoint_hash": "22c789604729ed346f745497b99eb62df116e7b50f671e4edf4058d382b0a235",
   "schedulers_sigma": "karras",
   "samples_save": false,
   "samples_format": "png",
-  "image_metadata": true
+  "image_metadata": true,
+  "cuda_dtype": "BF16",
+  "temp_dir": "D:\\AIMODEL\\sdnext-realism-workflow\\runs\\sdnext-temp"
 }

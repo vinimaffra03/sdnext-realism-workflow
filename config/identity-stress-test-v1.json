@@ -32,6 +32,8 @@
     "ip_start": 0.0,
     "ip_end": 0.8,
     "ip_crop": true,
+    "face_swap_reference": "samples/camila-reference-face-tight.png",
+    "face_swap_reference_sha256": "8D1EFA866201400F99E29107C94833CB05D0F21E21DF327B1BF29E6FEF23E62F",
     "faceid_model": "FaceID Base",
     "faceid_strength": 0.8,
     "faceid_structure": 0.8,
@@ -39,7 +41,7 @@
     "openpose_model": "OpenPose FP16",
     "openpose_strength": 0.7,
     "openpose_start": 0.0,
-    "openpose_end": 0.8
+    "openpose_end": 1.0
   },
   "realism_prompt": "RAW unedited candid smartphone photograph, full-length head-to-toe photograph, natural mature facial features, subtle facial asymmetry, visible realistic skin pores, faint natural blemishes, fine skin texture, minimal makeup, both hands and both feet visible, realistic body proportions, physically plausible fabric, realistic shadows, accurate skin tones, spontaneous social media photo, slight lens distortion, imperfect framing, slight sensor grain, no beauty retouching, ordinary real-life photograph",
   "sensuality_prompt": "confident adult sensuality, tasteful alluring fashion pose, intimate but non-explicit editorial mood, opaque clothing with complete intimate coverage",

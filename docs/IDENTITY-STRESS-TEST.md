@@ -28,8 +28,8 @@ Each row is one scene. Each column changes the conditioning or finishing stage.
 | `TXT` | Text-only baseline | Prompt and fixed seed only. Establishes the unconditioned pose and identity baseline. |
 | `IPA` | IP-Adapter Plus Face | Adds the authorized Camila reference at a conservative scale of `0.45`. Measures general facial resemblance. |
 | `FID` | FaceID | Uses the same reference with FaceID Base at strength `0.8`. The Base implementation ignores the required compatibility argument named `structure`. Measures identity transfer independently from IP-Adapter. |
-| `POS` | IP-Adapter plus OpenPose | Extracts a pose map from the matching `TXT` image, then applies that pose with IP-Adapter. Measures pose retention and identity together. |
-| `FIN` | Finished candidate | Runs a conservative face detailer on `POS`, then a 2x RealESRGAN Compact upscale. Measures the finishing pass without regenerating the composition. |
+| `POS` | OpenPose composition | Extracts a pose map from the matching `TXT` image and generates the pose-correct base without IP-Adapter. Identity is intentionally deferred so it cannot override body composition. |
+| `FIN` | Two-stage finished candidate | Runs a conservative face detailer on `POS`, applies a 2x RealESRGAN Compact upscale, then transfers the authorized fictional identity with offline InsightFace InSwapper. |
 
 Ten concepts multiplied by five variants yields 50 comparison files. The ten rows vary setting, wardrobe, stance, movement, camera relationship, and facial expression. This is not 50 unique compositions: every concept intentionally has five related variants. Exact values live in [`config/identity-stress-test-v1.json`](../config/identity-stress-test-v1.json).
 
@@ -59,8 +59,9 @@ The vertical 512 x 768 canvas is intentionally conservative for a 4 GB GPU. The 
 1. Install Stability Matrix.
 2. Install the SD.Next package through Stability Matrix.
 3. Install the exact CyberRealistic V9 FP16 checkpoint documented in the main README.
-4. Start SD.Next and wait until the checkpoint has fully loaded at `http://127.0.0.1:7860`.
-5. Allow the first use of IP-Adapter, FaceID, OpenPose, and the detailer to download their required auxiliary models.
+4. Apply the tested API compatibility patch described below if the `POS` stage will be used.
+5. Start SD.Next and wait until the checkpoint has fully loaded at `http://127.0.0.1:7860`.
+6. Allow the first use of IP-Adapter, FaceID, OpenPose, the detailer, RealESRGAN, InsightFace Buffalo-L, and InSwapper to download their required auxiliary models.
 
 The first conditioned image can take substantially longer than later images because SD.Next may download and initialize CLIP vision, IP-Adapter, InsightFace, ControlNet, detector, or upscaler assets. Keep the network available for that first run.
 
@@ -69,10 +70,25 @@ For a 16 GB system, close unused memory-intensive applications before loading th
 If ordinary Stability Matrix startup fails with Windows error 1455 or a Python `MemoryError`, the page file or total committed-memory headroom is too small. This repository includes a conservative launcher that starts SD.Next without checkpoint autoload and enables state-dict offload before requesting the checkpoint:
 
 ```powershell
-.\scripts\Start-SDNextLowMemory.ps1
+.\scripts\Start-SDNextLowMemory.ps1 -ComputeDType BF16 -MemoryMode lowvram
 ```
 
-It requires at least 6 GB of free virtual memory before starting. It deliberately does not close applications or change the Windows page file. Its separate runtime configuration does not overwrite the normal SD.Next `config.json` managed by Stability Matrix.
+It requires at least 6 GB of free virtual memory before starting. It deliberately does not close applications or change the Windows page file. Its separate runtime configuration does not overwrite the normal SD.Next `config.json` managed by Stability Matrix. BF16 is the validated compute dtype for this checkpoint and GPU; FP16 generated invalid black images during validation.
+
+## Tested SD.Next API compatibility patch
+
+The tested SD.Next revision has two issues on the API path used by `POS`: `/sdapi/v1/preprocess` declares the wrong response model, and API-created ControlNet units load as FP32 even when the active pipeline uses BF16. The latter causes `mat1 and mat2 must have the same dtype` at the first diffusion step. SD.Next also registers selectable Control scripts only while the Control UI is initialized; the supplied low-memory launcher therefore keeps that tab enabled internally even for API-driven runs.
+
+Stop SD.Next, apply the version-checked patch, and then restart it:
+
+```powershell
+.\scripts\Apply-SDNextApiCompatibilityPatch.ps1 `
+  -PackagePath '<Stability Matrix data directory>\Packages\SD.Next'
+
+.\scripts\Start-SDNextLowMemory.ps1 -ComputeDType BF16 -MemoryMode lowvram
+```
+
+The patch is idempotent, creates timestamped backups inside the SD.Next package, validates Python syntax, and refuses revisions other than `684940e015911efab2911667231946d91fef9f50` unless `-AllowDifferentRevision` is explicitly supplied. A later SD.Next update may make the patch unnecessary or change its target code; review upstream changes instead of bypassing the revision check automatically.
 
 ## Run a one-scene pilot first
 
@@ -122,7 +138,7 @@ Useful partial runs:
 .\scripts\Invoke-IdentityStressTest.ps1 -StartShot 2 -EndShot 2 -Stages IPA,FID -Force
 ```
 
-`POS` depends on the corresponding `TXT` file. `FIN` depends on the corresponding `POS` file. The script records a blocked stage in the manifest instead of silently substituting another input.
+`POS` depends on the corresponding `TXT` file. `FIN` depends on the corresponding `POS` file and the locally cached InsightFace/InSwapper assets. The script records a blocked stage in the manifest instead of silently substituting another input.
 
 Stages run across all selected scenes before the next stage begins. This stage-major order reduces repeated heavy-module switching and memory fragmentation on constrained hardware.
 
@@ -158,7 +174,22 @@ Request snapshots contain embedded base64 reference images and can consume subst
 
 The tested SD.Next revision exposes a structured FaceID API field with a positional-argument mismatch. This workflow therefore invokes the installed selectable script named `Face: Multiple ID Transfers` with its complete 17-argument contract. This is an explicit compatibility workaround, not a generic promise for every future SD.Next revision.
 
-If a later SD.Next update changes or fixes the script contract, validate `S01-FID` before launching the full matrix. The saved request JSON makes the exact call auditable.
+On the tested GTX 1650 4 GB system, `FaceID Base` remains unavailable in the required offloaded configuration. Its implementation attempts to move the complete pipeline to CUDA and Diffusers rejects that operation after sequential/balanced offload has been activated. `FID` is therefore recorded as failed on this hardware instead of being mislabeled as complete. IP-Adapter Plus Face remains useful as an independent comparison, but the production `FIN` path uses offline FaceSwap after the pose and upscale.
+
+## Why pose and identity are separated
+
+The combined IP-Adapter plus OpenPose request was tested at IP-Adapter scales `0.45`, `0.25`, and `0.20`. At 25 steps it repeatedly ignored the standing OpenPose map and converged to a seated composition. Extending ControlNet guidance from `0.8` to `1.0` did not solve the competition. Eight-step previews could appear compliant and were therefore not reliable approval evidence.
+
+The validated production order is:
+
+1. Generate `POS` with OpenPose only, strength `0.7`, start `0.0`, and end `1.0`.
+2. Run the conservative face Detailer on the pose-correct base.
+3. Upscale the approved composition to 1024 x 1536 with 2x RealESRGAN Compact.
+4. Run `scripts/Invoke-OfflineFaceSwap.py` on the finished pixels using the hash-verified fictional face reference.
+
+This order prevents identity conditioning from changing the body pose, framing, wardrobe, or scene. FaceSwap is intentionally last because a full-body face at 512 x 768 contains too few pixels for a strong transfer. The intermediate files remain available for audit and comparison.
+
+FaceID may be retested on hardware that can run the pipeline without sequential offload, but that path has not been validated by this repository. If a later SD.Next update changes or fixes either contract, validate one `FID` scene before launching the complete matrix. The saved request JSON makes the exact call auditable.
 
 ## Why LoRA is not applied to these 50 images
 
@@ -181,9 +212,9 @@ This v1 experiment compares individual identity approaches and two composite sta
 
 - `TXT` to `IPA` isolates the addition of IP-Adapter.
 - `TXT` to `FID` isolates the alternative FaceID path.
-- `IPA` to `POS` approximately measures the addition of OpenPose; `TXT` to `POS` changes two factors.
-- `POS` to `FIN` adds both the Detailer and Upscaler, so their effects are not independently attributable.
-- `FID` is not currently fed into `POS` or `FIN`; the better identity method must be selected after review and then used in the production branch.
+- `TXT` to `POS` measures pose control without identity conditioning during diffusion.
+- `POS` to `FIN` adds the Detailer, Upscaler, and offline FaceSwap, so those finishing effects are not independently attributable.
+- `FID` is not fed into `POS` or `FIN`; the working low-memory production branch uses offline FaceSwap after composition.
 - LoRA, ControlNet Depth, ControlNet Canny, and img2img are not part of this 50-file v1 matrix.
 
 The pose map is extracted from that concept's text-only image. This tests self-retention of a generated pose, not compliance with an independent pose photograph. Reject a `TXT` source with cropped limbs or broken anatomy before treating its OpenPose derivative as valid.
