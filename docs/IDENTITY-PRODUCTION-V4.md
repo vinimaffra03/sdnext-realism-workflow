@@ -2,6 +2,8 @@
 
 V4 produces non-explicit lifestyle photographs of the fictional, clearly adult N9 brunette in five Brazilian environments. It is designed for the tested GTX 1650 4 GB system and keeps all generated data on `D:`.
 
+The default API timeout is 90 minutes because a 512x768 IP-Adapter pass can exceed 30 minutes on the tested low-VRAM configuration, including VAE decoding.
+
 ## Design decisions
 
 - CyberRealistic V9 FP16, DPM++ SDE, Karras, CFG 6, 25 steps and Full VAE remain the visual baseline.

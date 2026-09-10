@@ -13,7 +13,7 @@ param(
     [ValidateRange(1, 10)]
     [int]$CandidateEnd = 10,
     [ValidateRange(60, 7200)]
-    [int]$TimeoutSec = 1800,
+    [int]$TimeoutSec = 5400,
     [switch]$ValidateOnly,
     [switch]$Force
 )

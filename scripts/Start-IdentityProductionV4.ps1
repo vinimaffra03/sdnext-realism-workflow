@@ -7,7 +7,8 @@ param(
     [string[]]$ShotIds = @(),
     [ValidateSet('TXT', 'IPA', 'FID', 'POSE')][string]$Conditioning = 'IPA',
     [ValidateRange(1, 10)][int]$CandidateStart = 1,
-    [ValidateRange(1, 10)][int]$CandidateEnd = 10
+    [ValidateRange(1, 10)][int]$CandidateEnd = 10,
+    [ValidateRange(60, 7200)][int]$TimeoutSec = 5400
 )
 
 $ErrorActionPreference = 'Stop'
@@ -21,13 +22,13 @@ $stdout = Join-Path $logRoot "v4-$stamp.stdout.log"
 $stderr = Join-Path $logRoot "v4-$stamp.stderr.log"
 $runner = Join-Path $PSScriptRoot 'Invoke-IdentityProductionV4.ps1'
 $pwsh = (Get-Command pwsh.exe -ErrorAction Stop).Source
-$args = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $runner, '-ApiBaseUri', $ApiBaseUri, '-ConfigPath', ([IO.Path]::GetFullPath($ConfigPath)), '-OutputDirectory', $OutputDirectory, '-Mode', $Mode, '-Conditioning', $Conditioning, '-CandidateStart', $CandidateStart, '-CandidateEnd', $CandidateEnd)
+$args = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $runner, '-ApiBaseUri', $ApiBaseUri, '-ConfigPath', ([IO.Path]::GetFullPath($ConfigPath)), '-OutputDirectory', $OutputDirectory, '-Mode', $Mode, '-Conditioning', $Conditioning, '-CandidateStart', $CandidateStart, '-CandidateEnd', $CandidateEnd, '-TimeoutSec', $TimeoutSec)
 if ($ShotIds.Count -gt 0) { $args += '-ShotIds'; $args += $ShotIds }
 $process = Start-Process -FilePath $pwsh -ArgumentList $args -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru -WindowStyle Hidden
 [ordered]@{
     pid = $process.Id; started_at = (Get-Date).ToString('o'); mode = $Mode; output_directory = $OutputDirectory
     config_path = [IO.Path]::GetFullPath($ConfigPath); conditioning = $Conditioning; shot_ids = @($ShotIds)
-    candidate_start = $CandidateStart; candidate_end = $CandidateEnd; stdout = $stdout; stderr = $stderr
+    candidate_start = $CandidateStart; candidate_end = $CandidateEnd; timeout_seconds = $TimeoutSec; stdout = $stdout; stderr = $stderr
 } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $OutputDirectory 'current-batch.json') -Encoding utf8
 Write-Host "Started V4 batch PID $($process.Id)"
 Write-Host "stdout: $stdout"
