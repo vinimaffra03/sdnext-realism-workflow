@@ -53,6 +53,8 @@ The first text-only fitting-room composition reproduced the location, dress and 
 
 The first subject-first pool composition produced a plausible adult subject but reverted to a close portrait and omitted the pool. The next pool candidate keeps the same ordering and changes only prompt attention: full-body framing and the residential pool are weighted, while close portrait crops receive stronger negative weight.
 
+The first text-only cafe candidate achieved a plausible spontaneous cafe portrait, but replaced the requested dark tank top with a white shirt and denim vest. The next cafe candidate keeps composition and pose instructions, weights the requested tank top, and rejects outer layers.
+
 ## Generate candidates
 
 After the pilot selects the conditioning method, generate candidates in the planned groups:
