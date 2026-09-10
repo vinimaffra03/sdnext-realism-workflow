@@ -3,7 +3,7 @@ param(
     [string]$ApiBaseUri = 'http://127.0.0.1:7860',
     [string]$ConfigPath = (Join-Path $PSScriptRoot '..\config\identity-production-v4-brazil.json'),
     [string]$OutputDirectory = (Join-Path $PSScriptRoot '..\runs\identity-production-v4-brazil'),
-    [ValidateSet('Pilot', 'Candidates')]
+    [ValidateSet('Pilot', 'CompositionPilot', 'Candidates')]
     [string]$Mode = 'Pilot',
     [string[]]$ShotIds = @(),
     [ValidateSet('TXT', 'IPA', 'FID', 'POSE')]
@@ -193,6 +193,13 @@ if ($Mode -eq 'Pilot') {
     if ([bool]$config.identity.faceid_enabled) { $jobs += [pscustomobject]@{ shot = $shotsById['P01']; candidate = 3; stage = 'FID' } }
     $jobs += [pscustomobject]@{ shot = $shotsById['M01']; candidate = 1; stage = 'IPA' }
     $jobs += [pscustomobject]@{ shot = $shotsById['C01']; candidate = 1; stage = 'IPA' }
+}
+elseif ($Mode -eq 'CompositionPilot') {
+    $jobs = @(
+        [pscustomobject]@{ shot = $shotsById['P01']; candidate = 4; stage = 'TXT' },
+        [pscustomobject]@{ shot = $shotsById['M01']; candidate = 1; stage = 'TXT' },
+        [pscustomobject]@{ shot = $shotsById['C01']; candidate = 1; stage = 'TXT' }
+    )
 }
 else {
     $selectedIds = if ($ShotIds.Count -gt 0) { @($ShotIds) } else { @($config.shots.id) }

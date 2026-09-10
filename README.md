@@ -227,7 +227,7 @@ Run the V4 Brazilian-environment pilot for the original N9 brunette:
 .\scripts\Start-IdentityProductionV4.ps1 -Mode Pilot
 ```
 
-V4 compares text-only, IP-Adapter Plus Face and FaceID, then supports a resumable ceiling of ten candidates for each of ten planned shots. It deliberately removes the mandatory InSwapper 128 final pass, supports optional localized face/eye/hand inpainting, and writes separate Lanczos and RealESRGAN 2x review outputs. See [`docs/IDENTITY-PRODUCTION-V4.md`](docs/IDENTITY-PRODUCTION-V4.md) for the candidate, selection and finalization commands.
+V4 uses text-only composition candidates followed by localized IP-Adapter face inpainting, after the pilot showed that full-scene IP-Adapter can dominate pose, wardrobe and location. It supports a resumable ceiling of ten candidates for each of ten planned shots, removes the mandatory InSwapper 128 final pass, supports optional localized face/eye/hand correction, and writes separate Lanczos and RealESRGAN 2x review outputs. See [`docs/IDENTITY-PRODUCTION-V4.md`](docs/IDENTITY-PRODUCTION-V4.md) for the candidate, selection and finalization commands.
 
 On a memory-constrained Windows system, use the optional preflighted launcher before the pilot:
 

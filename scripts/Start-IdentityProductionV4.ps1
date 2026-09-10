@@ -3,7 +3,7 @@ param(
     [string]$ApiBaseUri = 'http://127.0.0.1:7860',
     [string]$ConfigPath = (Join-Path $PSScriptRoot '..\config\identity-production-v4-brazil.json'),
     [string]$OutputDirectory = (Join-Path $PSScriptRoot '..\runs\identity-production-v4-brazil'),
-    [ValidateSet('Pilot', 'Candidates')][string]$Mode = 'Pilot',
+    [ValidateSet('Pilot', 'CompositionPilot', 'Candidates')][string]$Mode = 'Pilot',
     [string[]]$ShotIds = @(),
     [ValidateSet('TXT', 'IPA', 'FID', 'POSE')][string]$Conditioning = 'IPA',
     [ValidateRange(1, 10)][int]$CandidateStart = 1,

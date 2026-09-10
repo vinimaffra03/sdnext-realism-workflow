@@ -35,14 +35,22 @@ The failed FaceID attempt remains recorded in `manifest.csv`; resumptions do not
 
 Review `runs/identity-production-v4-brazil/report.html` at full resolution. Do not use identity cosine similarity to approve defects.
 
+The initial pilot showed that applying IP-Adapter to the entire image can dominate pose, wardrobe and location. V4 therefore uses a composition-first pipeline. Validate the strengthened scene prompts without identity conditioning:
+
+```powershell
+.\scripts\Start-IdentityProductionV4.ps1 -Mode CompositionPilot
+```
+
+Only after a composition passes visual QA is IP-Adapter applied to a localized face mask by the finalizer.
+
 ## Generate candidates
 
 After the pilot selects the conditioning method, generate candidates in the planned groups:
 
 ```powershell
-.\scripts\Start-IdentityProductionV4.ps1 -Mode Candidates -Conditioning IPA -CandidateStart 1 -CandidateEnd 3
-.\scripts\Start-IdentityProductionV4.ps1 -Mode Candidates -Conditioning IPA -CandidateStart 4 -CandidateEnd 6
-.\scripts\Start-IdentityProductionV4.ps1 -Mode Candidates -Conditioning IPA -CandidateStart 7 -CandidateEnd 10
+.\scripts\Start-IdentityProductionV4.ps1 -Mode Candidates -Conditioning TXT -CandidateStart 1 -CandidateEnd 3
+.\scripts\Start-IdentityProductionV4.ps1 -Mode Candidates -Conditioning TXT -CandidateStart 4 -CandidateEnd 6
+.\scripts\Start-IdentityProductionV4.ps1 -Mode Candidates -Conditioning TXT -CandidateStart 7 -CandidateEnd 10
 ```
 
 Run only one batch at a time. Use `-ShotIds P01,P02` to limit a batch. Existing valid filenames are skipped.

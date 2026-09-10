@@ -26,7 +26,7 @@
   "candidate_policy": {
     "maximum_per_shot": 10,
     "groups": [3, 3, 4],
-    "default_conditioning": "IPA",
+    "default_conditioning": "TXT",
     "seed_stride": 101
   },
   "identity": {
