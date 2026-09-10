@@ -210,6 +210,17 @@ Run the controlled 10-scene by 5-stage identity stress test:
 
 The five stages compare text-only generation, IP-Adapter Plus Face, FaceID, an OpenPose-only composition, and a two-stage finish that applies the Detailer, 2x upscale, and offline FaceSwap in that order. Identity is deliberately applied after pose generation because IP-Adapter and OpenPose competed for composition on the tested 4 GB GPU. Read [`docs/IDENTITY-STRESS-TEST.md`](docs/IDENTITY-STRESS-TEST.md) before running it.
 
+The resumable background launcher now accepts an explicit configuration and stage list:
+
+```powershell
+.\scripts\Start-IdentityProductionBatch.ps1 `
+  -OutputDirectory '.\runs\identity-production-v3-safe-frame' `
+  -ConfigPath '.\config\identity-production-v3-safe-frame.json' `
+  -Stages POS,FIN
+```
+
+`identity-production-v3-safe-frame.json` is the corrective seven-shot configuration produced after the V2 review. Its prepared OpenPose maps are centered with safe margins by `scripts/Prepare-OpenPoseSafeFrame.py`; the executor can consume those maps directly without requiring matching TXT images. `scripts/Measure-FaceIdentity.py` records InsightFace cosine similarity against the authorized fictional reference.
+
 On a memory-constrained Windows system, use the optional preflighted launcher before the pilot:
 
 ```powershell

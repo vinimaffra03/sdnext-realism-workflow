@@ -1,6 +1,9 @@
 [CmdletBinding()]
 param(
     [string]$OutputDirectory = (Join-Path $PSScriptRoot '..\runs\identity-production-v2'),
+    [string]$ConfigPath = (Join-Path $PSScriptRoot '..\config\identity-stress-test-v1.json'),
+    [ValidateSet('TXT', 'IPA', 'FID', 'POS', 'FIN')]
+    [string[]]$Stages = @('TXT', 'POS', 'FIN'),
     [ValidateRange(1, 10)][int]$StartShot = 1,
     [ValidateRange(1, 10)][int]$EndShot = 10,
     [ValidateRange(60, 7200)][int]$TimeoutSec = 1800
@@ -34,9 +37,10 @@ function Quote-PowerShellLiteral([string]$Value) {
 $command = @(
     '& ' + (Quote-PowerShellLiteral $runner),
     '-OutputDirectory ' + (Quote-PowerShellLiteral $output),
+    '-ConfigPath ' + (Quote-PowerShellLiteral ([IO.Path]::GetFullPath($ConfigPath))),
     "-StartShot $StartShot",
     "-EndShot $EndShot",
-    '-Stages TXT,POS,FIN',
+    '-Stages ' + ($Stages -join ','),
     "-TimeoutSec $TimeoutSec"
 ) -join ' '
 $encodedCommand = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($command))
@@ -53,7 +57,8 @@ $state = [ordered]@{
     pid = $process.Id
     started_at = (Get-Date).ToString('o')
     output_directory = $output
-    stages = @('TXT', 'POS', 'FIN')
+    stages = @($Stages)
+    config_path = [IO.Path]::GetFullPath($ConfigPath)
     start_shot = $StartShot
     end_shot = $EndShot
     stdout = $stdout

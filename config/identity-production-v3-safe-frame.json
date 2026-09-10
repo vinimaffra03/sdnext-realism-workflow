@@ -1,0 +1,107 @@
+{
+  "experiment": "identity-production-v3-safe-frame",
+  "tested_runtime": {
+    "sdnext_revision": "684940e015911efab2911667231946d91fef9f50",
+    "backend": "diffusers",
+    "gpu": "NVIDIA GeForce GTX 1650 4 GB",
+    "system_ram_gb": 16
+  },
+  "subject": {
+    "name": "Camila",
+    "status": "fictional clearly adult character",
+    "age": 23,
+    "reference_image": "samples/camila-reference-seed-231984751.png",
+    "reference_sha256": "00933EC3A8669F4C64A3CD9739782C4714E5383A4C5702E3E5B783D49CBC76DC"
+  },
+  "model": {
+    "checkpoint": "CyberRealistic_V9_FP16 [22c7896047]",
+    "autov2": "22C7896047",
+    "sha256": "22C789604729ED346F745497B99EB62DF116E7B50F671E4EDF4058D382B0A235",
+    "sampler": "DPM++ SDE",
+    "scheduler": "karras",
+    "cfg": 6.0,
+    "steps": 25,
+    "width": 512,
+    "height": 768,
+    "vae": "Full"
+  },
+  "identity": {
+    "prompt": "Camila, a fictional clearly adult 23-year-old Brazilian woman from Santa Catarina, sun-kissed tanned skin, light freckles across the nose and cheeks, blue-green eyes, softly arched brows, straight nose, full lips, defined jawline, high cheekbones, dirty honey blonde shoulder-length hair with sun-bleached lighter ends and slightly darker roots, loose beachy waves, athletic slim natural build",
+    "ip_adapter": "Plus Face",
+    "ip_scale": 0.45,
+    "ip_start": 0.0,
+    "ip_end": 0.8,
+    "ip_crop": true,
+    "face_swap_reference": "samples/camila-reference-face-tight.png",
+    "face_swap_reference_sha256": "8D1EFA866201400F99E29107C94833CB05D0F21E21DF327B1BF29E6FEF23E62F",
+    "faceid_model": "FaceID Base",
+    "faceid_strength": 0.8,
+    "faceid_structure": 0.8,
+    "openpose_preprocessor": "OpenPose",
+    "openpose_model": "OpenPose FP16",
+    "openpose_strength": 0.85,
+    "openpose_start": 0.0,
+    "openpose_end": 1.0
+  },
+  "realism_prompt": "RAW unedited candid smartphone photograph, full-length head-to-toe photograph, wide environmental framing, camera positioned far enough away to leave generous margin above the head and below both feet, subject occupies about 70 percent of frame height, natural mature facial features, subtle facial asymmetry, visible realistic skin pores, faint natural blemishes, fine skin texture, minimal makeup, both hands and both feet visible, realistic body proportions, physically plausible fabric, realistic shadows, accurate skin tones, spontaneous social media photo, slight lens distortion, imperfect framing, slight sensor grain, no beauty retouching, ordinary real-life photograph",
+  "sensuality_prompt": "confident adult sensuality, tasteful alluring fashion pose, intimate but non-explicit editorial mood, opaque clothing with complete intimate coverage",
+  "negative_prompt": "child, teenager, young-looking, underage, nudity, naked, topless, exposed breasts, nipples, visible genitals, transparent clothing, explicit sexual content, sex act, pornographic pose, fetish, cgi, 3d render, illustration, doll, mannequin, waxy skin, plastic skin, airbrushed skin, oversmoothed skin, glamour retouching, perfect symmetry, uncanny face, artificial eyes, fake teeth, excessive makeup, HDR, oversaturated, fake bokeh, bad anatomy, deformed hands, extra fingers, fused fingers, missing fingers, extra limbs, duplicate person, cropped head, cropped feet, cut off legs, close-up, portrait crop, medium shot, waist-up framing, subject touching frame edges, blurry, low resolution, watermark, text",
+  "shots": [
+    {
+      "id": "S01",
+      "seed": 231984751,
+      "scene": "beside a residential pool in Florianopolis with subtropical vegetation under soft overcast Atlantic daylight",
+      "outfit": "an elegant high-cut opaque black bikini",
+      "pose": "relaxed contrapposto, arms naturally at her sides, feet slightly apart",
+      "expression": "calm direct eye contact"
+    },
+    {
+      "id": "S02",
+      "seed": 231984852,
+      "scene": "on a quiet Florianopolis beach at early sunrise with a gentle ocean haze",
+      "outfit": "a deep emerald opaque one-piece swimsuit with conventional complete coverage and physically plausible seams",
+      "pose": "walking toward the camera with natural arm swing and one foot mid-step",
+      "expression": "a gentle open smile"
+    },
+    {
+      "id": "S03",
+      "seed": 231984953,
+      "scene": "on the Lagoa da Conceicao promenade in soft late-afternoon daylight",
+      "outfit": "an ivory linen halter top and matching high-waisted tailored shorts, clearly separate garments, no swimwear",
+      "pose": "side profile with weight on the rear leg and one hand brushing her hair",
+      "expression": "a softly amused glance toward the camera"
+    },
+    {
+      "id": "S04",
+      "seed": 231985054,
+      "scene": "on a modern apartment balcony just after rain with soft window reflections",
+      "outfit": "a burgundy satin midi dress ending below the knees and low heels",
+      "pose": "a light lean against the railing with ankles crossed",
+      "expression": "a confident half-smile"
+    },
+    {
+      "id": "S05",
+      "seed": 231985155,
+      "scene": "inside a boutique hotel room illuminated only by soft natural window light",
+      "outfit": "an opaque black fashion bodysuit with a satin robe draped over her shoulders",
+      "pose": "seated at the edge of the bed with legs angled diagonally and both feet fully visible inside the frame",
+      "expression": "warm direct eye contact"
+    },
+    {
+      "id": "S09",
+      "seed": 231985559,
+      "scene": "inside a glass botanical conservatory surrounded by lush plants in diffused morning light, visibly descending one stair",
+      "outfit": "a dark-green tailored romper and clean white sneakers",
+      "pose": "descending one stair with one hand lightly touching the railing",
+      "expression": "a curious subtle smile"
+    },
+    {
+      "id": "S10",
+      "seed": 231985660,
+      "scene": "standing inside a dark wood gothic library with visible bookshelves beside a tall window at dusk",
+      "outfit": "a black velvet square-neck midi dress, a small silver necklace, and black boots",
+      "pose": "standing with one hand on the window frame and the other relaxed near her waist",
+      "expression": "an intense composed gaze"
+    }
+  ]
+}

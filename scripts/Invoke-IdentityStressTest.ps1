@@ -780,11 +780,15 @@ foreach ($stage in $orderedStages) {
             }
             'POS' {
                 $txtPath = Join-Path $OutputDirectory "$($shot.id)-TXT.png"
-                if (Test-ExistingStageOutput -Path $txtPath -ExpectedWidth ([int]$config.model.width) -ExpectedHeight ([int]$config.model.height)) {
+                $preparedPoseMapPath = Join-Path $poseDirectory "$($shot.id)-openpose.png"
+                if (Test-ExistingStageOutput -Path $preparedPoseMapPath -ExpectedWidth ([int]$config.model.width) -ExpectedHeight ([int]$config.model.height)) {
+                    [void](Invoke-PoseStage -Shot $shot -Prompt $prompt -PoseSourcePath $preparedPoseMapPath)
+                }
+                elseif (Test-ExistingStageOutput -Path $txtPath -ExpectedWidth ([int]$config.model.width) -ExpectedHeight ([int]$config.model.height)) {
                     [void](Invoke-PoseStage -Shot $shot -Prompt $prompt -PoseSourcePath $txtPath)
                 }
                 else {
-                    Set-ManifestRecord -Shot $shot.id -Stage 'POS' -Seed $shot.seed -File "$($shot.id)-POS.png" -Status 'blocked' -Conditioning 'OpenPose only; identity deferred to FIN' -ErrorMessage 'A valid TXT pose source is missing.'
+                    Set-ManifestRecord -Shot $shot.id -Stage 'POS' -Seed $shot.seed -File "$($shot.id)-POS.png" -Status 'blocked' -Conditioning 'OpenPose only; identity deferred to FIN' -ErrorMessage 'A valid prepared OpenPose map or TXT pose source is missing.'
                 }
             }
             'FIN' {

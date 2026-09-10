@@ -221,6 +221,51 @@ The pose map is extracted from that concept's text-only image. This tests self-r
 
 The IP-Adapter input uses face cropping to reduce leakage from the reference's original background and wardrobe.
 
+## Production V2 review and V3 correction
+
+The completed V2 production run generated 30 of 30 requested `TXT`, `POS`, and `FIN` files without a failed or blocked manifest row. Offline InsightFace measurement across the ten final images produced a mean cosine similarity of `0.912`, so identity transfer was not the main failure mode. Only three images achieved near/full-body framing.
+
+The cause was visible in the saved pose maps: several OpenPose skeletons inherited cropped or edge-touching limbs from their matching TXT image. A prompt that requests `head-to-toe` cannot restore joints that are absent from the conditioning map.
+
+The corrective V3 workflow therefore:
+
+1. Preserves the approved V2 files.
+2. Retries only the seven rejected concepts: `S01` through `S05`, `S09`, and `S10`.
+3. Uses 512 x 768 prepared OpenPose maps with the detected skeleton centered inside a safe margin.
+4. Raises OpenPose strength from `0.70` to `0.85`.
+5. Adds explicit wide-framing language and more specific wardrobe constraints.
+6. Runs only `POS` and `FIN`, avoiding an unnecessary new TXT pass.
+
+Create a safe-frame map with the SD.Next virtual environment:
+
+```powershell
+<SD.Next>\venv\Scripts\python.exe .\scripts\Prepare-OpenPoseSafeFrame.py `
+  --input .\source-openpose.png `
+  --output .\runs\identity-production-v3-safe-frame\pose-maps\S01-openpose.png `
+  --width 512 --height 768 --height-fraction 0.70 --width-fraction 0.56
+```
+
+Start or resume the corrective batch:
+
+```powershell
+.\scripts\Start-IdentityProductionBatch.ps1 `
+  -OutputDirectory '.\runs\identity-production-v3-safe-frame' `
+  -ConfigPath '.\config\identity-production-v3-safe-frame.json' `
+  -Stages POS,FIN
+```
+
+Measure the final identity similarity without modifying any image:
+
+```powershell
+<SD.Next>\venv\Scripts\python.exe .\scripts\Measure-FaceIdentity.py `
+  --reference .\samples\camila-reference-face-tight.png `
+  --targets .\runs\identity-production-v2\S01-FIN.png `
+  --analysis-root '<Stability Matrix data directory>\Models\Diffusers\models--vladmandic--insightface-faceanalysis' `
+  --output .\runs\identity-production-v2\face-identity-similarity.csv
+```
+
+Cosine similarity is a diagnostic, not a quality score. Selection still requires visual review of anatomy, framing, wardrobe, scene, realism, and expression.
+
 ## Evaluation rubric
 
 Score every output from 1 to 5 on:
