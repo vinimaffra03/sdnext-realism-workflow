@@ -49,6 +49,8 @@ The second composition round front-loads framing, location, wardrobe, pose and e
 
 That ordering produced the correct environment but omitted the person. The next controlled round moves the single adult subject and identity block first, followed immediately by framing, location and wardrobe.
 
+The first text-only fitting-room composition reproduced the location, dress and full-body framing, but the phone occluded the face. The next fitting-room candidate keeps the scene specification and explicitly places the phone beside the shoulder, outside the facial silhouette.
+
 ## Generate candidates
 
 After the pilot selects the conditioning method, generate candidates in the planned groups:
