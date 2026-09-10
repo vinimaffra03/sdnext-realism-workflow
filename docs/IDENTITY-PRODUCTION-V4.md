@@ -47,6 +47,8 @@ Only after a composition passes visual QA is IP-Adapter applied to a localized f
 
 The second composition round front-loads framing, location, wardrobe, pose and expression before the identity and realism blocks. This prevents essential scene terms from being diluted by a long SD 1.5 prompt.
 
+That ordering produced the correct environment but omitted the person. The next controlled round moves the single adult subject and identity block first, followed immediately by framing, location and wardrobe.
+
 ## Generate candidates
 
 After the pilot selects the conditioning method, generate candidates in the planned groups:

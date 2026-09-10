@@ -89,7 +89,7 @@ function Write-Gallery {
 
 function New-Prompt {
     param([object]$Shot)
-    return "$($Shot.framing), $($Shot.scene), wearing $($Shot.outfit), $($Shot.pose), $($Shot.expression), one person, $($config.identity.prompt), $($config.realism_prompt), $($config.sensuality_prompt)"
+    return "one person, $($config.identity.prompt), $($Shot.framing), $($Shot.scene), wearing $($Shot.outfit), $($Shot.pose), $($Shot.expression), $($config.realism_prompt), $($config.sensuality_prompt)"
 }
 
 function New-NegativePrompt {
@@ -197,7 +197,7 @@ if ($Mode -eq 'Pilot') {
 }
 elseif ($Mode -eq 'CompositionPilot') {
     $jobs = @(
-        [pscustomobject]@{ shot = $shotsById['P01']; candidate = 5; stage = 'TXT' },
+        [pscustomobject]@{ shot = $shotsById['P01']; candidate = 6; stage = 'TXT' },
         [pscustomobject]@{ shot = $shotsById['M01']; candidate = 1; stage = 'TXT' },
         [pscustomobject]@{ shot = $shotsById['C01']; candidate = 1; stage = 'TXT' }
     )
