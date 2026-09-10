@@ -51,6 +51,8 @@ That ordering produced the correct environment but omitted the person. The next 
 
 The first text-only fitting-room composition reproduced the location, dress and full-body framing, but the phone occluded the face. The next fitting-room candidate keeps the scene specification and explicitly places the phone beside the shoulder, outside the facial silhouette.
 
+The first subject-first pool composition produced a plausible adult subject but reverted to a close portrait and omitted the pool. The next pool candidate keeps the same ordering and changes only prompt attention: full-body framing and the residential pool are weighted, while close portrait crops receive stronger negative weight.
+
 ## Generate candidates
 
 After the pilot selects the conditioning method, generate candidates in the planned groups:
