@@ -59,7 +59,7 @@ After the pilot selects the conditioning method, generate candidates in the plan
 .\scripts\Start-IdentityProductionV4.ps1 -Mode Candidates -Conditioning TXT -CandidateStart 7 -CandidateEnd 10
 ```
 
-Run only one batch at a time. Use `-ShotIds P01,P02` to limit a batch. Existing valid filenames are skipped.
+Run only one batch at a time. The launcher has a singleton guard: if a V4 runner is already active for the same output directory, it reports that PID and exits without adding a duplicate SD.Next queue. Use `-ShotIds P01,P02` to limit a batch. Existing valid filenames are skipped.
 
 ## Finalize selected candidates
 
