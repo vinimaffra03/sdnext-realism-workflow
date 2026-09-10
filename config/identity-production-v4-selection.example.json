@@ -1,0 +1,10 @@
+{
+  "selections": [
+    {
+      "shot": "P01",
+      "source": "P01-C02-IPA.png",
+      "corrections": ["face"],
+      "notes": "Replace with the visually approved candidate. Remove face when no correction is needed."
+    }
+  ]
+}

@@ -221,6 +221,14 @@ The resumable background launcher now accepts an explicit configuration and stag
 
 `identity-production-v3-safe-frame.json` is the corrective seven-shot configuration produced after the V2 review. Its prepared OpenPose maps are centered with safe margins by `scripts/Prepare-OpenPoseSafeFrame.py`; the executor can consume those maps directly without requiring matching TXT images. `scripts/Measure-FaceIdentity.py` records InsightFace cosine similarity against the authorized fictional reference.
 
+Run the V4 Brazilian-environment pilot for the original N9 brunette:
+
+```powershell
+.\scripts\Start-IdentityProductionV4.ps1 -Mode Pilot
+```
+
+V4 compares text-only, IP-Adapter Plus Face and FaceID, then supports a resumable ceiling of ten candidates for each of ten planned shots. It deliberately removes the mandatory InSwapper 128 final pass, supports optional localized face/eye/hand inpainting, and writes separate Lanczos and RealESRGAN 2x review outputs. See [`docs/IDENTITY-PRODUCTION-V4.md`](docs/IDENTITY-PRODUCTION-V4.md) for the candidate, selection and finalization commands.
+
 On a memory-constrained Windows system, use the optional preflighted launcher before the pilot:
 
 ```powershell

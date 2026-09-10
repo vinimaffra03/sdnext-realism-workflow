@@ -1,0 +1,178 @@
+{
+  "experiment": "identity-production-v4-brazil",
+  "tested_runtime": {
+    "sdnext_revision": "684940e015911efab2911667231946d91fef9f50",
+    "backend": "diffusers",
+    "gpu": "NVIDIA GeForce GTX 1650 4 GB",
+    "system_ram_gb": 16
+  },
+  "subject": {
+    "name": "N9 brunette",
+    "status": "fictional clearly adult character",
+    "age": 23,
+    "reference_image": "samples/baseline-n9.png",
+    "reference_sha256": "A13F6FA67F26B22B53C848336152C10F1AFB3D8EC7AED76E4DA73D9606E8125E"
+  },
+  "model": {
+    "checkpoint": "CyberRealistic_V9_FP16 [22c7896047]",
+    "autov2": "22C7896047",
+    "sha256": "22C789604729ED346F745497B99EB62DF116E7B50F671E4EDF4058D382B0A235",
+    "sampler": "DPM++ SDE",
+    "scheduler": "karras",
+    "cfg": 6.0,
+    "steps": 25,
+    "vae": "Full"
+  },
+  "candidate_policy": {
+    "maximum_per_shot": 10,
+    "groups": [3, 3, 4],
+    "default_conditioning": "IPA",
+    "seed_stride": 101
+  },
+  "identity": {
+    "prompt": "the same fictional clearly adult 23-year-old Brazilian brunette woman from the authorized N9 reference, dark brown slightly messy hair, brown eyes, natural mature facial features, subtle facial asymmetry, minimal makeup",
+    "ip_adapter": "Plus Face",
+    "ip_scale": 0.4,
+    "ip_start": 0.0,
+    "ip_end": 0.75,
+    "ip_crop": true,
+    "faceid_model": "FaceID Base",
+    "faceid_strength": 0.7,
+    "faceid_structure": 0.7,
+    "openpose_preprocessor": "OpenPose",
+    "openpose_model": "OpenPose FP16",
+    "openpose_strength": 0.75,
+    "openpose_start": 0.0,
+    "openpose_end": 0.9
+  },
+  "realism_prompt": "RAW unedited candid photograph, ordinary Brazilian real-life photography, natural mature facial features, subtle facial asymmetry, visible realistic skin pores, faint natural blemishes, fine skin texture, minimal makeup, relaxed imperfect posture, physically plausible fabric and seams, realistic shadows, accurate skin tones, soft natural light, 50mm documentary photography, f/4, ISO 200, slight sensor grain, imperfect framing, no beauty retouching",
+  "sensuality_prompt": "confident adult sensuality, spontaneous natural pose, tasteful alluring non-explicit lifestyle fashion, opaque clothing with complete intimate coverage",
+  "negative_prompt": "child, teenager, young-looking, underage, nudity, naked, topless, exposed breasts, nipples, visible genitals, transparent clothing, explicit sexual content, sex act, pornographic pose, fetish, cgi, 3d render, illustration, doll, mannequin, waxy skin, plastic skin, airbrushed skin, oversmoothed skin, glamour retouching, perfect symmetry, uncanny face, crossed eyes, mismatched irises, artificial eyes, fake teeth, fused teeth, excessive makeup, HDR, oversaturated, fake bokeh, flat background, studio backdrop, bad anatomy, deformed hands, extra fingers, fused fingers, missing fingers, extra limbs, duplicate person, cropped head, cropped feet, cut off legs, blurry, low resolution, watermark, text",
+  "finalization": {
+    "face_detector": "face-yolo8m",
+    "eye_detector": "eyes-full-v1",
+    "hand_detector": "hand_yolov8n",
+    "detail_steps": 15,
+    "detail_strength": 0.18,
+    "detail_resolution": 1024,
+    "detail_blur": 10,
+    "detail_padding": 24,
+    "upscalers": ["Resize Lanczos", "Spandrel 2x RealESRGAN Compact"]
+  },
+  "shots": [
+    {
+      "id": "P01",
+      "seed": 231984751,
+      "width": 512,
+      "height": 768,
+      "framing": "wide full-length head-to-toe environmental photograph, camera positioned far enough away, subject occupies about 65 percent of frame height, generous visible space above the head and below both feet, both hands and both feet fully visible",
+      "negative_additions": "close-up, portrait crop, medium shot, waist-up framing, knees cropped, ankles cropped, subject touching frame edges",
+      "scene": "beside a modest residential pool at a lived-in home in Florianopolis, subtropical plants, ordinary patio furniture, soft overcast Atlantic daylight",
+      "outfit": "a simple opaque black bikini with realistic seams and complete intimate coverage",
+      "pose": "standing in relaxed contrapposto with arms naturally at her sides and feet slightly apart",
+      "expression": "calm direct eye contact with lips gently closed"
+    },
+    {
+      "id": "P02",
+      "seed": 231984852,
+      "width": 512,
+      "height": 768,
+      "framing": "natural half-body photograph from head to mid-thigh",
+      "scene": "sitting casually on the edge of a residential pool in Florianopolis, wet stone, garden plants, diffused afternoon daylight",
+      "outfit": "an opaque wine-colored bikini with realistic fabric tension and complete intimate coverage",
+      "pose": "seated slightly sideways with one hand resting on the pool edge and shoulders relaxed",
+      "expression": "soft private smile with lips closed"
+    },
+    {
+      "id": "M01",
+      "seed": 231984953,
+      "width": 512,
+      "height": 768,
+      "framing": "wide full-length head-to-toe mirror photograph, camera positioned far enough away, subject occupies about 65 percent of frame height, entire body and both feet visible with generous margin inside the mirror",
+      "negative_additions": "close-up, portrait crop, medium shot, waist-up framing, knees cropped, ankles cropped, body extending outside mirror, subject touching frame edges",
+      "scene": "inside an ordinary Brazilian shopping-mall fitting room, realistic mirror, hooks, bench, warm neutral store lighting",
+      "outfit": "a short fitted opaque burgundy dress with plausible seams and complete coverage",
+      "pose": "natural mirror try-on stance with weight on one leg, phone held away from the face, free arm relaxed",
+      "expression": "subtle confident half-smile"
+    },
+    {
+      "id": "M02",
+      "seed": 231985054,
+      "width": 512,
+      "height": 768,
+      "framing": "direct half-body photograph from head to mid-thigh, not a selfie",
+      "scene": "inside a Brazilian shopping-mall fitting room with a curtain, bench and realistic warm ceiling lights",
+      "outfit": "an opaque fitted black crop top and short high-waisted skirt with physically plausible fabric",
+      "pose": "turning slightly toward the camera while adjusting the skirt waistband with one hand",
+      "expression": "relaxed amused glance with lips closed"
+    },
+    {
+      "id": "C01",
+      "seed": 231985155,
+      "width": 512,
+      "height": 512,
+      "framing": "close conversational portrait from chest upward",
+      "scene": "at a small neighborhood cafe in Florianopolis, ordinary tables, cups and softly recognizable patrons in the background, window daylight",
+      "outfit": "a fitted opaque dark tank top and a small silver necklace",
+      "pose": "leaning slightly toward the table as if listening during a conversation",
+      "expression": "a small natural smile showing only a hint of individual teeth"
+    },
+    {
+      "id": "C02",
+      "seed": 231985256,
+      "width": 512,
+      "height": 768,
+      "framing": "natural seated half-body photograph",
+      "scene": "at a casual Brazilian neighborhood cafe near a window, ceramic coffee cup, realistic chairs and street details outside",
+      "outfit": "an opaque rust-colored crop top and high-waisted blue jeans",
+      "pose": "seated sideways with one elbow lightly resting near the table and torso naturally twisted",
+      "expression": "thoughtful candid look away from the camera"
+    },
+    {
+      "id": "B01",
+      "seed": 231985357,
+      "width": 512,
+      "height": 768,
+      "framing": "wide full-length head-to-toe candid walking photograph, camera positioned far enough away, subject occupies about 65 percent of frame height, generous visible sand below both feet and space above the head",
+      "negative_additions": "close-up, portrait crop, medium shot, waist-up framing, knees cropped, ankles cropped, subject touching frame edges",
+      "scene": "walking on a Florianopolis beach near a simple Brazilian kiosk, real sand footprints, beach chairs and soft late-afternoon daylight",
+      "outfit": "an opaque navy one-piece swimsuit with complete coverage and an open white linen shirt",
+      "pose": "walking naturally toward the camera with realistic arm swing and one foot mid-step",
+      "expression": "relaxed closed-mouth smile"
+    },
+    {
+      "id": "B02",
+      "seed": 231985458,
+      "width": 512,
+      "height": 768,
+      "framing": "natural half-body beach photograph from head to mid-thigh",
+      "scene": "beside a small beach kiosk in Florianopolis with weathered wood, real umbrellas and diffused ocean light",
+      "outfit": "an opaque dark-green bikini with realistic fabric and complete intimate coverage",
+      "pose": "standing at a slight angle with one hand loosely behind her hair and the other arm relaxed",
+      "expression": "spontaneous glance toward the photographer with lips closed"
+    },
+    {
+      "id": "R01",
+      "seed": 231985559,
+      "width": 512,
+      "height": 512,
+      "framing": "intimate but non-explicit close portrait from chest upward",
+      "scene": "inside an ordinary lived-in bedroom in Florianopolis, soft daylight from a real window, neutral bedding and subtle household details",
+      "outfit": "opaque black lingerie fully covered by a loosely draped satin robe, complete intimate coverage",
+      "pose": "standing near the window with shoulders relaxed and one hand lightly holding the robe lapel",
+      "expression": "warm direct eye contact with lips gently closed"
+    },
+    {
+      "id": "R02",
+      "seed": 231985660,
+      "width": 512,
+      "height": 768,
+      "framing": "wide full-length head-to-toe environmental photograph, camera positioned far enough away, subject occupies about 65 percent of frame height, generous visible floor below both feet and space above the head",
+      "negative_additions": "close-up, portrait crop, medium shot, waist-up framing, knees cropped, ankles cropped, subject touching frame edges",
+      "scene": "inside an ordinary Brazilian bedroom beside a window, realistic curtains, floor and bedding in soft morning daylight",
+      "outfit": "opaque wine-colored lingerie with complete intimate coverage and an open lightweight robe",
+      "pose": "standing naturally near the window with one knee softly bent and both arms relaxed",
+      "expression": "composed confident gaze with lips closed"
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+# Identity Production V4
+
+V4 produces non-explicit lifestyle photographs of the fictional, clearly adult N9 brunette in five Brazilian environments. It is designed for the tested GTX 1650 4 GB system and keeps all generated data on `D:`.
+
+## Design decisions
+
+- CyberRealistic V9 FP16, DPM++ SDE, Karras, CFG 6, 25 steps and Full VAE remain the visual baseline.
+- The approved `samples/baseline-n9.png` is the only identity reference.
+- Candidate generation is resumable and never overwrites an existing PNG unless `-Force` is explicit.
+- The pilot compares text-only, IP-Adapter Plus Face and FaceID before the full candidate queue is selected.
+- OpenPose is refused unless a shot has an authorized, complete `pose_source` in the configuration.
+- InSwapper 128 is not part of V4. Identity similarity is diagnostic and never substitutes for visual QA.
+- Face, eye and hand corrections are optional localized inpainting passes. Face/eye passes use IP-Adapter at moderate strength.
+- Lanczos and RealESRGAN outputs are always separate review candidates. Neither is automatically declared final.
+
+## Generate the pilot
+
+Launch SD.Next first, then run:
+
+```powershell
+.\scripts\Test-IdentityProductionV4.ps1
+.\scripts\Start-IdentityProductionV4.ps1 -Mode Pilot
+```
+
+The five pilot jobs are:
+
+1. Pool, text only.
+2. Pool, IP-Adapter Plus Face.
+3. Pool, FaceID.
+4. Fitting room, IP-Adapter Plus Face.
+5. Cafe, IP-Adapter Plus Face.
+
+Review `runs/identity-production-v4-brazil/report.html` at full resolution. Do not use identity cosine similarity to approve defects.
+
+## Generate candidates
+
+After the pilot selects the conditioning method, generate candidates in the planned groups:
+
+```powershell
+.\scripts\Start-IdentityProductionV4.ps1 -Mode Candidates -Conditioning IPA -CandidateStart 1 -CandidateEnd 3
+.\scripts\Start-IdentityProductionV4.ps1 -Mode Candidates -Conditioning IPA -CandidateStart 4 -CandidateEnd 6
+.\scripts\Start-IdentityProductionV4.ps1 -Mode Candidates -Conditioning IPA -CandidateStart 7 -CandidateEnd 10
+```
+
+Run only one batch at a time. Use `-ShotIds P01,P02` to limit a batch. Existing valid filenames are skipped.
+
+## Finalize selected candidates
+
+Copy `config/identity-production-v4-selection.example.json`, list one approved candidate per shot, and request only necessary corrections. Supported automatic correction labels are `face`, `eyes`, and `hands`.
+
+```powershell
+.\scripts\Finalize-IdentityProductionV4.ps1 -SelectionPath '.\config\identity-production-v4-selection.json'
+```
+
+The finalizer creates localized masks, preserves the rest of the image, uses IP-Adapter for face/eye inpainting, and writes separate Lanczos and RealESRGAN 2x files under `runs/identity-production-v4-brazil/final-review/`.
+
+The final command requires exactly ten unique selections. Use `-AllowPartial` only when validating the finalization path with one pilot image.
+
+Clothing, reflection, mirror or background defects that cannot be isolated safely are grounds for rejection. Do not repair them with a broad automatic pass.
+
+## Acceptance gate
+
+Approve a candidate only after inspecting the full image and enlarged face, eyes, teeth, hands, feet, fabric, shadows, background and reflections. Ten images are the target, but a defective image must never be accepted to fill the quota. The hard generation ceiling is 100 candidates.
