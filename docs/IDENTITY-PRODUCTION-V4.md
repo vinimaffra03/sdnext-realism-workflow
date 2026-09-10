@@ -43,6 +43,8 @@ The initial pilot showed that applying IP-Adapter to the entire image can domina
 
 Only after a composition passes visual QA is IP-Adapter applied to a localized face mask by the finalizer.
 
+The second composition round front-loads framing, location, wardrobe, pose and expression before the identity and realism blocks. This prevents essential scene terms from being diluted by a long SD 1.5 prompt.
+
 ## Generate candidates
 
 After the pilot selects the conditioning method, generate candidates in the planned groups:
