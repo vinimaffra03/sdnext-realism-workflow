@@ -4,6 +4,8 @@ V4 produces non-explicit lifestyle photographs of the fictional, clearly adult N
 
 The default API timeout is 90 minutes because a 512x768 IP-Adapter pass can exceed 30 minutes on the tested low-VRAM configuration, including VAE decoding.
 
+The queue guard treats an empty SD.Next job name as idle even when an interrupted request leaves stale step counters in the progress endpoint.
+
 ## Design decisions
 
 - CyberRealistic V9 FP16, DPM++ SDE, Karras, CFG 6, 25 steps and Full VAE remain the visual baseline.

@@ -44,6 +44,7 @@ function Wait-SDNextIdle {
     $deadline = (Get-Date).AddSeconds($TimeoutSec)
     while ((Get-Date) -lt $deadline) {
         $progress = Invoke-RestMethod -Uri "$baseUri/sdapi/v1/progress?skip_current_image=true" -TimeoutSec 15
+        if (-not [string]$progress.state.job) { return }
         if ([int]$progress.state.sampling_steps -eq 0 -and [double]$progress.progress -eq 0) { return }
         Start-Sleep -Seconds 10
     }
