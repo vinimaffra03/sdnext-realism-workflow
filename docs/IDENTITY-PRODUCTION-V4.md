@@ -7,7 +7,7 @@ V4 produces non-explicit lifestyle photographs of the fictional, clearly adult N
 - CyberRealistic V9 FP16, DPM++ SDE, Karras, CFG 6, 25 steps and Full VAE remain the visual baseline.
 - The approved `samples/baseline-n9.png` is the only identity reference.
 - Candidate generation is resumable and never overwrites an existing PNG unless `-Force` is explicit.
-- The pilot compares text-only, IP-Adapter Plus Face and FaceID before the full candidate queue is selected.
+- The initial pilot compared text-only and IP-Adapter Plus Face. FaceID was attempted once and disabled on the tested 4 GB low-VRAM runtime because it conflicts with SD.Next sequential CPU offload.
 - OpenPose is refused unless a shot has an authorized, complete `pose_source` in the configuration.
 - InSwapper 128 is not part of V4. Identity similarity is diagnostic and never substitutes for visual QA.
 - Face, eye and hand corrections are optional localized inpainting passes. Face/eye passes use IP-Adapter at moderate strength.
@@ -26,9 +26,10 @@ The five pilot jobs are:
 
 1. Pool, text only.
 2. Pool, IP-Adapter Plus Face.
-3. Pool, FaceID.
-4. Fitting room, IP-Adapter Plus Face.
-5. Cafe, IP-Adapter Plus Face.
+3. Fitting room, IP-Adapter Plus Face.
+4. Cafe, IP-Adapter Plus Face.
+
+The failed FaceID attempt remains recorded in `manifest.csv`; resumptions do not repeat it while `identity.faceid_enabled` is false.
 
 Review `runs/identity-production-v4-brazil/report.html` at full resolution. Do not use identity cosine similarity to approve defects.
 

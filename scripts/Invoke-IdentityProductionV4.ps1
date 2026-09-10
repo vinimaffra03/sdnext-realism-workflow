@@ -188,11 +188,11 @@ $shotsById = @{}; foreach ($shot in $config.shots) { $shotsById[[string]$shot.id
 if ($Mode -eq 'Pilot') {
     $jobs = @(
         [pscustomobject]@{ shot = $shotsById['P01']; candidate = 1; stage = 'TXT' },
-        [pscustomobject]@{ shot = $shotsById['P01']; candidate = 2; stage = 'IPA' },
-        [pscustomobject]@{ shot = $shotsById['P01']; candidate = 3; stage = 'FID' },
-        [pscustomobject]@{ shot = $shotsById['M01']; candidate = 1; stage = 'IPA' },
-        [pscustomobject]@{ shot = $shotsById['C01']; candidate = 1; stage = 'IPA' }
+        [pscustomobject]@{ shot = $shotsById['P01']; candidate = 2; stage = 'IPA' }
     )
+    if ([bool]$config.identity.faceid_enabled) { $jobs += [pscustomobject]@{ shot = $shotsById['P01']; candidate = 3; stage = 'FID' } }
+    $jobs += [pscustomobject]@{ shot = $shotsById['M01']; candidate = 1; stage = 'IPA' }
+    $jobs += [pscustomobject]@{ shot = $shotsById['C01']; candidate = 1; stage = 'IPA' }
 }
 else {
     $selectedIds = if ($ShotIds.Count -gt 0) { @($ShotIds) } else { @($config.shots.id) }

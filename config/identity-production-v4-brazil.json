@@ -37,6 +37,8 @@
     "ip_end": 0.75,
     "ip_crop": true,
     "faceid_model": "FaceID Base",
+    "faceid_enabled": false,
+    "faceid_disabled_reason": "Incompatible with SD.Next sequential CPU offload on the tested 4 GB low-VRAM runtime",
     "faceid_strength": 0.7,
     "faceid_structure": 0.7,
     "openpose_preprocessor": "OpenPose",
