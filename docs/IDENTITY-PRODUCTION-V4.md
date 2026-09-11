@@ -59,6 +59,8 @@ The weighted text-only pool candidate again reverted to a close portrait. Becaus
 
 The second text-only fitting-room candidate removed the phone occlusion but collapsed into a close selfie with a duplicated reflected head and no dress or full body. The next controlled fitting-room test therefore uses OpenPose extracted from the complete M01-C01-TXT composition; its occluded face is irrelevant because the OpenPose preprocessor excludes facial landmarks.
 
+The second cafe candidate again ignored the dark tank top and introduced gibberish text. The next controlled cafe test keeps the scene and pose, but moves the required sleeveless dark tank top into a shot-specific priority block immediately after the single-person token and strengthens the no-text constraint.
+
 ## Generate candidates
 
 After the pilot selects the conditioning method, generate candidates in the planned groups:

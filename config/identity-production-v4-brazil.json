@@ -115,12 +115,13 @@
       "seed": 231985155,
       "width": 512,
       "height": 512,
+      "priority_prompt": "(wearing only a fitted opaque dark sleeveless tank top:1.5), bare shoulders, no outer layer",
       "framing": "close conversational portrait from chest upward",
       "scene": "at a small neighborhood cafe in Florianopolis, ordinary tables, cups and softly recognizable patrons in the background, window daylight",
       "outfit": "(a fitted opaque dark tank top:1.4), bare shoulders, no outer layer, and a small silver necklace",
       "pose": "leaning slightly toward the table as if listening during a conversation",
       "expression": "a small natural smile showing only a hint of individual teeth",
-      "negative_additions": "white shirt, denim vest, jacket, cardigan, outer layer"
+      "negative_additions": "white shirt, denim vest, jacket, cardigan, outer layer, letters, signage, gibberish"
     },
     {
       "id": "C02",
