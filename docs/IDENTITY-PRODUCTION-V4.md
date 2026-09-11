@@ -61,6 +61,8 @@ The second text-only fitting-room candidate removed the phone occlusion but coll
 
 The second cafe candidate again ignored the dark tank top and introduced gibberish text. The next controlled cafe test keeps the scene and pose, but moves the required sleeveless dark tank top into a shot-specific priority block immediately after the single-person token and strengthens the no-text constraint.
 
+The first OpenPose control request loaded ControlNet but did not preserve the pose because SD.Next applied the named OpenPose preprocessor again to the already processed skeleton override. V4 now preprocesses the authorized source once, then submits the skeleton with `process: None`; this follows the runtime implementation and prevents the control map from being erased by a second pose-detection pass.
+
 ## Generate candidates
 
 After the pilot selects the conditioning method, generate candidates in the planned groups:

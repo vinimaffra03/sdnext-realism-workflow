@@ -124,9 +124,9 @@ function New-TxtPayload {
 function New-PosePayload {
     param([object]$Shot, [long]$Seed, [string]$PoseBase64)
     $unit = [ordered]@{
-        process = [string]$config.identity.openpose_preprocessor; model = [string]$config.identity.openpose_model
+        process = 'None'; model = [string]$config.identity.openpose_model
         strength = [double]$config.identity.openpose_strength; start = [double]$config.identity.openpose_start; end = [double]$config.identity.openpose_end
-        unit_type = 'controlnet'; process_params = [ordered]@{ include_body = $true; include_hand = $true; include_face = $false }; override = $PoseBase64
+        unit_type = 'controlnet'; process_params = [ordered]@{}; override = $PoseBase64
     }
     return [ordered]@{
         input_type = 0; prompt = New-Prompt -Shot $Shot; negative_prompt = New-NegativePrompt -Shot $Shot
@@ -198,8 +198,8 @@ if ($Mode -eq 'Pilot') {
 }
 elseif ($Mode -eq 'CompositionPilot') {
     $jobs = @(
-        [pscustomobject]@{ shot = $shotsById['P01']; candidate = 8; stage = 'POSE' },
-        [pscustomobject]@{ shot = $shotsById['M01']; candidate = 3; stage = 'POSE' },
+        [pscustomobject]@{ shot = $shotsById['P01']; candidate = 9; stage = 'POSE' },
+        [pscustomobject]@{ shot = $shotsById['M01']; candidate = 4; stage = 'POSE' },
         [pscustomobject]@{ shot = $shotsById['C01']; candidate = 3; stage = 'TXT' }
     )
 }
