@@ -69,6 +69,8 @@ The corrected OpenPose request proved that full-body control works, but its long
 
 The corrected OpenPose fitting-room candidate also preserved full-body mirror composition but lost the burgundy dress and kept the phone over the face. Its next candidate uses the same control settings with a compact critical prompt. The first cafe img2img test preserved the cafe but could not change the outfit at 0.35 denoise, so the next test changes only denoise strength to 0.55.
 
+P01-C10-POSE is the first composition-pass candidate: corrected OpenPose plus compact prompting produced the required complete adult subject, black bikini and residential pool. `config/identity-production-v4-selection.partial.json` sends that source through localized face and hand correction as the partial finalization gate. It is not a final approval until both upscale variants and detector crops pass visual QA.
+
 ## Generate candidates
 
 After the pilot selects the conditioning method, generate candidates in the planned groups:

@@ -1,0 +1,10 @@
+{
+  "selections": [
+    {
+      "shot": "P01",
+      "source": "P01-C10-POSE.png",
+      "corrections": ["face", "hands"],
+      "notes": "Composition-approved technical finalization gate. Review identity, eyes, hands, feet, both upscale methods, and all crops before final approval."
+    }
+  ]
+}
