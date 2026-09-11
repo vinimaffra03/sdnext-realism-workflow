@@ -91,6 +91,12 @@ Copy `config/identity-production-v4-selection.example.json`, list one approved c
 .\scripts\Finalize-IdentityProductionV4.ps1 -SelectionPath '.\config\identity-production-v4-selection.json'
 ```
 
+For unattended processing, use the singleton launcher. It refuses to start while either a generator or another finalizer owns the same run directory:
+
+```powershell
+.\scripts\Start-IdentityFinalizationV4.ps1 -SelectionPath '.\config\identity-production-v4-selection.partial.json' -AllowPartial
+```
+
 The finalizer creates localized masks, preserves the rest of the image, uses IP-Adapter for face/eye inpainting, and writes separate Lanczos and RealESRGAN 2x files under `runs/identity-production-v4-brazil/final-review/`.
 
 The final command requires exactly ten unique selections. Use `-AllowPartial` only when validating the finalization path with one pilot image.
