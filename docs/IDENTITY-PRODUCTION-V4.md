@@ -57,6 +57,8 @@ The first text-only cafe candidate achieved a plausible spontaneous cafe portrai
 
 The weighted text-only pool candidate again reverted to a close portrait. Because the same composition failure persisted, the next controlled pool test switches to OpenPose using the complete, project-generated full-body P01-C02-IPA image as the authorized pose source; appearance remains text-driven.
 
+The second text-only fitting-room candidate removed the phone occlusion but collapsed into a close selfie with a duplicated reflected head and no dress or full body. The next controlled fitting-room test therefore uses OpenPose extracted from the complete M01-C01-TXT composition; its occluded face is irrelevant because the OpenPose preprocessor excludes facial landmarks.
+
 ## Generate candidates
 
 After the pilot selects the conditioning method, generate candidates in the planned groups:

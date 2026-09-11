@@ -198,7 +198,7 @@ if ($Mode -eq 'Pilot') {
 elseif ($Mode -eq 'CompositionPilot') {
     $jobs = @(
         [pscustomobject]@{ shot = $shotsById['P01']; candidate = 8; stage = 'POSE' },
-        [pscustomobject]@{ shot = $shotsById['M01']; candidate = 2; stage = 'TXT' },
+        [pscustomobject]@{ shot = $shotsById['M01']; candidate = 3; stage = 'POSE' },
         [pscustomobject]@{ shot = $shotsById['C01']; candidate = 2; stage = 'TXT' }
     )
 }
