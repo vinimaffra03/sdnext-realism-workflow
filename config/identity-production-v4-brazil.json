@@ -67,6 +67,7 @@
       "seed": 231984751,
       "width": 512,
       "height": 768,
+      "compact_prompt": "candid full-body photo, one fictional adult 23-year-old Brazilian brunette, head-to-toe beside a modest residential pool in Florianopolis, opaque black bikini with full coverage, both hands and feet visible, relaxed stance, brown eyes, messy dark hair, natural skin pores, subtle asymmetry, overcast daylight, ordinary patio, realistic unretouched photograph",
       "framing": "(wide full-length environmental photograph:1.4), (head-to-toe view:1.4), camera positioned far enough away, subject occupies about 65 percent of frame height, generous visible space above the head and below both feet, both hands and both feet fully visible",
       "negative_additions": "(close-up:1.5), (portrait crop:1.5), (medium shot:1.4), waist-up framing, knees cropped, ankles cropped, subject touching frame edges",
       "scene": "(beside a modest residential swimming pool at a lived-in home in Florianopolis:1.3), subtropical plants, ordinary patio furniture, soft overcast Atlantic daylight",

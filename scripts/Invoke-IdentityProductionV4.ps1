@@ -90,6 +90,7 @@ function Write-Gallery {
 
 function New-Prompt {
     param([object]$Shot)
+    if ($Shot.compact_prompt) { return "$($Shot.compact_prompt), $($config.realism_prompt), $($config.sensuality_prompt)" }
     $priority = if ($Shot.priority_prompt) { "$($Shot.priority_prompt), " } else { '' }
     return "one person, $priority$($config.identity.prompt), $($Shot.framing), $($Shot.scene), wearing $($Shot.outfit), $($Shot.pose), $($Shot.expression), $($config.realism_prompt), $($config.sensuality_prompt)"
 }
@@ -218,7 +219,7 @@ if ($Mode -eq 'Pilot') {
 }
 elseif ($Mode -eq 'CompositionPilot') {
     $jobs = @(
-        [pscustomobject]@{ shot = $shotsById['P01']; candidate = 9; stage = 'POSE' },
+        [pscustomobject]@{ shot = $shotsById['P01']; candidate = 10; stage = 'POSE' },
         [pscustomobject]@{ shot = $shotsById['M01']; candidate = 4; stage = 'POSE' },
         [pscustomobject]@{ shot = $shotsById['C01']; candidate = 4; stage = 'IMG' }
     )
