@@ -55,6 +55,8 @@ The first subject-first pool composition produced a plausible adult subject but 
 
 The first text-only cafe candidate achieved a plausible spontaneous cafe portrait, but replaced the requested dark tank top with a white shirt and denim vest. The next cafe candidate keeps composition and pose instructions, weights the requested tank top, and rejects outer layers.
 
+The weighted text-only pool candidate again reverted to a close portrait. Because the same composition failure persisted, the next controlled pool test switches to OpenPose using the complete, project-generated full-body P01-C02-IPA image as the authorized pose source; appearance remains text-driven.
+
 ## Generate candidates
 
 After the pilot selects the conditioning method, generate candidates in the planned groups:

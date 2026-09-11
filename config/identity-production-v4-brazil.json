@@ -72,7 +72,8 @@
       "scene": "(beside a modest residential swimming pool at a lived-in home in Florianopolis:1.3), subtropical plants, ordinary patio furniture, soft overcast Atlantic daylight",
       "outfit": "a simple opaque black bikini with realistic seams and complete intimate coverage",
       "pose": "standing in relaxed contrapposto with arms naturally at her sides and feet slightly apart",
-      "expression": "calm direct eye contact with lips gently closed"
+      "expression": "calm direct eye contact with lips gently closed",
+      "pose_source": "runs/identity-production-v4-brazil/P01-C02-IPA.png"
     },
     {
       "id": "P02",
