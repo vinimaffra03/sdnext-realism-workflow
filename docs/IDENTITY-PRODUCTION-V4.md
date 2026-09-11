@@ -67,6 +67,8 @@ The wardrobe-first cafe candidate produced the requested dark sleeveless top but
 
 The corrected OpenPose request proved that full-body control works, but its long SD 1.5 prompt lost the pool and wardrobe. V4 now supports a shot-specific `compact_prompt` that places identity, framing, location, outfit and realism inside the first CLIP context window. Additional realism terms remain appended and may be truncated without displacing the critical scene definition.
 
+The corrected OpenPose fitting-room candidate also preserved full-body mirror composition but lost the burgundy dress and kept the phone over the face. Its next candidate uses the same control settings with a compact critical prompt. The first cafe img2img test preserved the cafe but could not change the outfit at 0.35 denoise, so the next test changes only denoise strength to 0.55.
+
 ## Generate candidates
 
 After the pilot selects the conditioning method, generate candidates in the planned groups:

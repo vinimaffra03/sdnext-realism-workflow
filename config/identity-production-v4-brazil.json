@@ -92,6 +92,7 @@
       "seed": 231984953,
       "width": 512,
       "height": 768,
+      "compact_prompt": "candid full-body mirror photo, one fictional adult 23-year-old Brazilian brunette, inside a shopping-mall fitting room, wearing a short fitted opaque burgundy dress, phone beside shoulder outside face, entire face visible, full body and both feet inside mirror, natural stance, warm store lights, realistic unretouched photograph",
       "framing": "wide full-length head-to-toe mirror photograph, camera positioned far enough away, subject occupies about 65 percent of frame height, entire body and both feet visible with generous margin inside the mirror",
       "negative_additions": "close-up, portrait crop, medium shot, waist-up framing, knees cropped, ankles cropped, body extending outside mirror, subject touching frame edges, phone covering face, face hidden, face occluded",
       "scene": "inside an ordinary Brazilian shopping-mall fitting room, realistic mirror, hooks, bench, warm neutral store lighting",
@@ -124,7 +125,7 @@
       "expression": "a small natural smile showing only a hint of individual teeth",
       "negative_additions": "white shirt, denim vest, jacket, cardigan, outer layer, letters, signage, gibberish",
       "img_source": "runs/identity-production-v4-brazil/C01-C01-TXT.png",
-      "img_denoise": 0.35
+      "img_denoise": 0.55
     },
     {
       "id": "C02",
