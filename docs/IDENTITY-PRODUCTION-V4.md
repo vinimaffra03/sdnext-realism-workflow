@@ -63,6 +63,8 @@ The second cafe candidate again ignored the dark tank top and introduced gibberi
 
 The first OpenPose control request loaded ControlNet but did not preserve the pose because SD.Next applied the named OpenPose preprocessor again to the already processed skeleton override. V4 now preprocesses the authorized source once, then submits the skeleton with `process: None`; this follows the runtime implementation and prevents the control map from being erased by a second pose-detection pass.
 
+The wardrobe-first cafe candidate produced the requested dark sleeveless top but lost the cafe. V4 now supports an `IMG` composition-refinement stage. The next cafe test uses the successful C01-C01-TXT cafe composition as a project-owned img2img source at 0.35 denoise, while the wardrobe-first prompt asks for the dark tank top.
+
 ## Generate candidates
 
 After the pilot selects the conditioning method, generate candidates in the planned groups:

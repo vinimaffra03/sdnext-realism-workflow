@@ -6,7 +6,7 @@ param(
     [ValidateSet('Pilot', 'CompositionPilot', 'Candidates')]
     [string]$Mode = 'Pilot',
     [string[]]$ShotIds = @(),
-    [ValidateSet('TXT', 'IPA', 'FID', 'POSE')]
+    [ValidateSet('TXT', 'IPA', 'FID', 'POSE', 'IMG')]
     [string]$Conditioning = 'IPA',
     [ValidateRange(1, 10)]
     [int]$CandidateStart = 1,
@@ -23,6 +23,7 @@ $repoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
 $config = Get-Content -LiteralPath (Resolve-Path -LiteralPath $ConfigPath).Path -Raw | ConvertFrom-Json
 $baseUri = $ApiBaseUri.TrimEnd('/')
 $txt2imgUri = "$baseUri/sdapi/v1/txt2img"
+$img2imgUri = "$baseUri/sdapi/v1/img2img"
 $controlUri = "$baseUri/sdapi/v1/control"
 $preprocessUri = "$baseUri/sdapi/v1/preprocess"
 $outputRoot = [IO.Path]::GetFullPath($OutputDirectory)
@@ -137,6 +138,21 @@ function New-PosePayload {
     }
 }
 
+function New-ImgPayload {
+    param([object]$Shot, [long]$Seed)
+    if (-not $Shot.img_source) { throw "$($Shot.id) has no authorized img_source; IMG was refused." }
+    $sourcePath = (Resolve-Path -LiteralPath (Join-Path $repoRoot ([string]$Shot.img_source))).Path
+    return [ordered]@{
+        init_images = @([Convert]::ToBase64String([IO.File]::ReadAllBytes($sourcePath)))
+        prompt = New-Prompt -Shot $Shot; negative_prompt = New-NegativePrompt -Shot $Shot; seed = $Seed
+        batch_size = 1; n_iter = 1; steps = [int]$config.model.steps; width = [int]$Shot.width; height = [int]$Shot.height
+        sampler_name = [string]$config.model.sampler; schedulers_sigma = [string]$config.model.scheduler
+        cfg_scale = [double]$config.model.cfg; guidance_scale = [double]$config.model.cfg; vae_type = [string]$config.model.vae
+        denoising_strength = [double]$Shot.img_denoise; resize_mode = 0
+        detailer_enabled = $false; save_images = $false; send_images = $true; do_not_save_samples = $true
+    }
+}
+
 function Invoke-Job {
     param([object]$Shot, [int]$Candidate, [string]$Stage)
     $seed = [long]$Shot.seed + ([long]($Candidate - 1) * [long]$config.candidate_policy.seed_stride)
@@ -160,6 +176,10 @@ function Invoke-Job {
         Save-ApiImage -Encoded ([string]$preResponse.image) -Path $poseMap
         $payload = New-PosePayload -Shot $Shot -Seed $seed -PoseBase64 ([Convert]::ToBase64String([IO.File]::ReadAllBytes($poseMap)))
         $uri = $controlUri
+    }
+    elseif ($Stage -eq 'IMG') {
+        $payload = New-ImgPayload -Shot $Shot -Seed $seed
+        $uri = $img2imgUri
     }
     else { $payload = New-TxtPayload -Shot $Shot -Seed $seed -Stage $Stage }
     $payload | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath (Join-Path $requestRoot "$jobId.json") -Encoding utf8
@@ -200,7 +220,7 @@ elseif ($Mode -eq 'CompositionPilot') {
     $jobs = @(
         [pscustomobject]@{ shot = $shotsById['P01']; candidate = 9; stage = 'POSE' },
         [pscustomobject]@{ shot = $shotsById['M01']; candidate = 4; stage = 'POSE' },
-        [pscustomobject]@{ shot = $shotsById['C01']; candidate = 3; stage = 'TXT' }
+        [pscustomobject]@{ shot = $shotsById['C01']; candidate = 4; stage = 'IMG' }
     )
 }
 else {

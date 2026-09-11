@@ -5,7 +5,7 @@ param(
     [string]$OutputDirectory = (Join-Path $PSScriptRoot '..\runs\identity-production-v4-brazil'),
     [ValidateSet('Pilot', 'CompositionPilot', 'Candidates')][string]$Mode = 'Pilot',
     [string[]]$ShotIds = @(),
-    [ValidateSet('TXT', 'IPA', 'FID', 'POSE')][string]$Conditioning = 'IPA',
+    [ValidateSet('TXT', 'IPA', 'FID', 'POSE', 'IMG')][string]$Conditioning = 'IPA',
     [ValidateRange(1, 10)][int]$CandidateStart = 1,
     [ValidateRange(1, 10)][int]$CandidateEnd = 10,
     [ValidateRange(60, 7200)][int]$TimeoutSec = 5400

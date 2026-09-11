@@ -121,7 +121,9 @@
       "outfit": "(a fitted opaque dark tank top:1.4), bare shoulders, no outer layer, and a small silver necklace",
       "pose": "leaning slightly toward the table as if listening during a conversation",
       "expression": "a small natural smile showing only a hint of individual teeth",
-      "negative_additions": "white shirt, denim vest, jacket, cardigan, outer layer, letters, signage, gibberish"
+      "negative_additions": "white shirt, denim vest, jacket, cardigan, outer layer, letters, signage, gibberish",
+      "img_source": "runs/identity-production-v4-brazil/C01-C01-TXT.png",
+      "img_denoise": 0.35
     },
     {
       "id": "C02",
